@@ -1,0 +1,204 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:PSNav.Models.Accounts"
+             xmlns:converters="clr-namespace:PSNav.Converters"
+             xmlns:iconPacks="clr-namespace:IconPacks.Avalonia.Codicons;assembly=IconPacks.Avalonia.Codicons"
+             xmlns:bootstrapIcons="clr-namespace:IconPacks.Avalonia.BootstrapIcons;assembly=IconPacks.Avalonia.BootstrapIcons"
+             xmlns:accounts="clr-namespace:PSNav.ViewModels.Accounts"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
+             x:Class="PSNav.Views.Accounts.AccountsView"
+             x:DataType="accounts:AccountsViewModel">
+
+    <UserControl.Resources>
+        <converters:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter" />
+        <converters:DateTimeOffsetToLocalConverter x:Key="DateTimeOffsetToLocalConverter" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*"
+          RowSpacing="8">
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto,Auto">
+            <StackPanel Grid.Column="0"
+                        Spacing="4">
+                <TextBlock Text="Accounts"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Command="{Binding SynchronizeCommand}"
+                    ToolTip.Tip="Synchronize">
+                <iconPacks:PackIconCodicons Kind="Sync"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+            </Button>
+
+            <Button Grid.Column="2"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    VerticalAlignment="Center">
+                <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuItem Header="Add PSN Account" Click="AddAccount_Click">
+                            <MenuItem.Icon>
+                                <bootstrapIcons:PackIconBootstrapIcons Kind="Playstation" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Add Offline Account" Click="AddOfflineAccount_Click">
+                            <MenuItem.Icon>
+                                <iconPacks:PackIconCodicons Kind="Person" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+                <iconPacks:PackIconCodicons Kind="Add"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+            </Button>
+        </Grid>
+
+        <StackPanel Grid.Row="1"
+                    IsVisible="{Binding IsSynchronizing}"
+                    Spacing="8"
+                    Margin="0,-8,0,0">
+            <TextBlock Text="{Binding SyncStatus}"
+                       Foreground="#FF9A9A9A"
+                       FontSize="12" />
+            <ProgressBar Value="{Binding SyncProgress}"
+                         Minimum="0"
+                         Maximum="100"
+                         Height="4"
+                         Background="#FF242424"
+                         Foreground="#FF0078D4" />
+        </StackPanel>
+
+        <Border Grid.Row="2"
+                Background="#FF101010"
+                BorderBrush="#FF242424"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="0"
+                ClipToBounds="True">
+            <DataGrid ItemsSource="{Binding Accounts}"
+                      SelectedItem="{Binding SelectedAccount}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="True"
+                      Background="Transparent"
+                      BorderThickness="0">
+                <DataGrid.Styles>
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                    <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                    <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                    <Style Selector="DataGridRow">
+                        <Setter Property="Foreground" Value="White" />
+                    </Style>
+                    <Style Selector="DataGridRow[IsSelected=True]">
+                        <Setter Property="Foreground" Value="White" />
+                    </Style>
+                    <Style Selector="DataGridRow" x:DataType="models:Account">
+                        <Setter Property="Classes.expired" Value="{Binding IsTokenExpired}" />
+                    </Style>
+                    <Style Selector="DataGridRow.expired">
+                        <Setter Property="Foreground" Value="Red" />
+                    </Style>
+                </DataGrid.Styles>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header=""
+                                            Width="56"
+                                            CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Width="36"
+                                        Height="36"
+                                        CornerRadius="18"
+                                        ClipToBounds="True"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="#FF242424">
+                                    <Image
+                                        Source="{Binding DisplayPicture, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=36}"
+                                        Width="36"
+                                        Height="36"
+                                        Stretch="Uniform"
+                                        RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Profile ID"
+                                        Binding="{Binding OnlineId}"
+                                        Width="*" />
+                    <DataGridTextColumn Header="Entitlements"
+                                        Binding="{Binding EntitlementCount}"
+                                        Width="Auto" />
+                    <DataGridTextColumn Header="Account ID"
+                                        Binding="{Binding AccountId}"
+                                        Width="Auto" />
+                    <DataGridTextColumn Header="Token Expiration"
+                                        Binding="{Binding NpssoTokenExpiration, Converter={StaticResource DateTimeOffsetToLocalConverter}, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}', TargetNullValue='- - -'}"
+                                        Width="Auto" />
+                    <DataGridTextColumn Header="Last Synchronization"
+                                        Binding="{Binding LastSynchronization, Converter={StaticResource DateTimeOffsetToLocalConverter}, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}', TargetNullValue='- - -'}"
+                                        Width="Auto" />
+                    <DataGridTemplateColumn Header=""
+                                            Width="Auto"
+                                            CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Click="RefreshAccount_Click"
+                                            ToolTip.Tip="Refresh NPSSO Token"
+                                            Background="Transparent"
+                                            Padding="4"
+                                            Margin="4,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding HasNpssoToken}">
+                                        <iconPacks:PackIconCodicons Kind="Refresh"
+                                                                    Width="16"
+                                                                    Height="16"
+                                                                    Foreground="#FF9A9A9A" />
+                                    </Button>
+                                    <Button Click="DeleteAccount_Click"
+                                            ToolTip.Tip="Delete Account"
+                                            Background="Transparent"
+                                            Padding="4"
+                                            Margin="4,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <iconPacks:PackIconCodicons Kind="Trash"
+                                                                    Width="16"
+                                                                    Height="16"
+                                                                    Foreground="#FF9A9A9A" />
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

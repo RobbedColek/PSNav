@@ -1,0 +1,105 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:PSNav.Models.Patches"
+             xmlns:converters="clr-namespace:PSNav.Converters"
+             xmlns:iconPacks="clr-namespace:IconPacks.Avalonia.PhosphorIcons;assembly=IconPacks.Avalonia.PhosphorIcons"
+             xmlns:patches="clr-namespace:PSNav.ViewModels.Patches"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
+             x:Class="PSNav.Views.Patches.PatchesView"
+             x:DataType="patches:PatchesViewModel">
+
+    <UserControl.Resources>
+        <converters:IsActiveToBrushConverter x:Key="IsActiveToBrushConverter" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*"
+          RowSpacing="8">
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto,Auto">
+            <StackPanel Grid.Column="0"
+                        Spacing="4">
+                <TextBlock Text="Upload to ProsperoPatches"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    VerticalAlignment="Center"
+                    Command="{Binding UploadCommand}"
+                    ToolTip.Tip="Upload">
+                <iconPacks:PhosphorIcons Kind="UploadSimple" />
+            </Button>
+        </Grid>
+
+        <StackPanel Grid.Row="1"
+                    IsVisible="{Binding IsUploading}"
+                    Spacing="8"
+                    Margin="0,-8,0,0">
+            <TextBlock Text="{Binding UploadStatus}"
+                       Foreground="#FF9A9A9A"
+                       FontSize="12" />
+            <ProgressBar Value="{Binding UploadProgress}"
+                         Minimum="0"
+                         Maximum="100"
+                         Height="4"
+                         Background="#FF242424"
+                         Foreground="#FF0078D4" />
+        </StackPanel>
+
+        <Border Grid.Row="2"
+                Background="#FF101010"
+                BorderBrush="#FF242424"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="0"
+                ClipToBounds="True">
+            <DataGrid ItemsSource="{Binding Patches}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="True"
+                      Background="Transparent"
+                      BorderThickness="0">
+                <DataGrid.Styles>
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                    <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                    <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                    <Style Selector="DataGridRow" x:DataType="models:Patch">
+                        <Setter Property="Foreground"
+                                Value="{Binding !IsSent, Converter={StaticResource IsActiveToBrushConverter}}" />
+                    </Style>
+                </DataGrid.Styles>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name"
+                                        Binding="{Binding Name}"
+                                        Width="*" />
+                    <DataGridTextColumn Header="Entitlement ID"
+                                        Binding="{Binding EntitlementId}"
+                                        Width="Auto" />
+                    <DataGridTextColumn Header="Uploaded?"
+                                        Binding="{Binding IsSent}"
+                                        Width="Auto" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

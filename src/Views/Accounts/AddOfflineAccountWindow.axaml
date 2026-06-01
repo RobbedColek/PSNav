@@ -1,0 +1,57 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="400"
+        d:DesignHeight="180"
+        x:Class="PSNav.Views.Accounts.AddOfflineAccountWindow"
+        Title="Add Offline Account"
+        Width="640"
+        Height="220"
+        MinWidth="640"
+        MinHeight="220"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="BorderOnly"
+        CanResize="False">
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          Margin="20"
+          RowSpacing="10">
+        <StackPanel Grid.Row="0"
+                    Spacing="8">
+            <TextBlock Text="Add offline account"
+                       FontSize="24"
+                       FontWeight="SemiBold" />
+
+            <TextBlock
+                Text="Offline account can be used to link profiles from console without adding a real PlayStation Network account."
+                TextWrapping="Wrap"
+                Foreground="#FFBDBDBD">
+            </TextBlock>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1"
+                    Spacing="12">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Profile ID"
+                           FontSize="12"
+                           Foreground="#FF9A9A9A" />
+                <TextBox x:Name="OnlineIdTextBox" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+            <Button MinWidth="90"
+                    Content="Cancel"
+                    Click="Cancel_Click" />
+            <Button x:Name="AddButton"
+                    MinWidth="110"
+                    Content="Add account"
+                    Click="Add_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

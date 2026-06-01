@@ -1,0 +1,526 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:PSNav.Models.Entitlements"
+             xmlns:converters="clr-namespace:PSNav.Converters"
+             xmlns:codicons="clr-namespace:IconPacks.Avalonia.Codicons;assembly=IconPacks.Avalonia.Codicons"
+             xmlns:phosphoricons="clr-namespace:IconPacks.Avalonia.PhosphorIcons;assembly=IconPacks.Avalonia.PhosphorIcons"
+             xmlns:vm="clr-namespace:PSNav.ViewModels.Entitlements"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
+             x:Class="PSNav.Views.Entitlements.EntitlementsView"
+             x:DataType="vm:EntitlementsViewModel">
+
+    <UserControl.Resources>
+        <converters:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter" />
+        <converters:IsActiveToBrushConverter x:Key="IsActiveToBrushConverter" />
+        <converters:FilterActiveToBrushConverter x:Key="FilterActiveToBrushConverter" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="ListBox.FilterListBox">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.FilterListBox ListBoxItem">
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="ListBox.FilterListBox CheckBox">
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="8,0,0,0" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="Grid.Blurred">
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <BlurEffect Radius="10" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid>
+        <Grid RowDefinitions="Auto,*"
+              RowSpacing="16"
+              Classes.Blurred="{Binding IsImageOverlayVisible}">
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="*,Auto,Auto">
+                <StackPanel Grid.Column="0"
+                            Spacing="4">
+                    <TextBlock Text="Entitlements"
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Foreground="White" />
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        MinWidth="36"
+                        Height="36"
+                        Padding="0"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center">
+                    <Button.Flyout>
+                        <Flyout>
+                            <ListBox ItemsSource="{Binding AvailableColumns}"
+                                     Classes="FilterListBox">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding IsSelected}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Flyout>
+                    </Button.Flyout>
+                    <phosphoricons:PhosphorIcons Kind="Columns" />
+                </Button>
+                <TextBox Grid.Column="2"
+                         Width="448"
+                         Height="36"
+                         VerticalAlignment="Center"
+                         Watermark="Search..."
+                         Text="{Binding SearchText}">
+                    <TextBox.InnerLeftContent>
+                        <codicons:PackIconCodicons Kind="Search"
+                                                   Width="14"
+                                                   Height="14"
+                                                   Margin="8,0,0,0"
+                                                   Foreground="#FF9A9A9A"
+                                                   VerticalAlignment="Center" />
+                    </TextBox.InnerLeftContent>
+                    <TextBox.InnerRightContent>
+                        <Button Background="Transparent"
+                                Margin="0,0,8,0"
+                                Width="24"
+                                Height="24"
+                                Focusable="False"
+                                IsTabStop="False"
+                                Click="EmptySearchField_Click">
+                            <codicons:PackIconCodicons Kind="Trash"
+                                                       Width="16"
+                                                       Height="16"
+                                                       Foreground="#FF9A9A9A"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                        </Button>
+                    </TextBox.InnerRightContent>
+                </TextBox>
+            </Grid>
+
+            <Border Grid.Row="1"
+                    Background="#FF101010"
+                    BorderBrush="#FF242424"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="0"
+                    ClipToBounds="True">
+                <Grid ColumnDefinitions="*,Auto">
+                    <DataGrid Grid.Column="0"
+                              ItemsSource="{Binding FilteredEntitlements}"
+                              SelectedItem="{Binding SelectedEntitlement}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              CanUserReorderColumns="False"
+                              CanUserResizeColumns="True"
+                              CanUserSortColumns="True"
+                              VerticalScrollBarVisibility="Auto"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              RowHeight="36">
+                        <DataGrid.Styles>
+                            <Style Selector="DataGridColumnHeader">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                                <Setter Property="IsVisible" Value="False" />
+                            </Style>
+                            <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                                <Setter Property="IsVisible" Value="False" />
+                            </Style>
+                            <Style Selector="DataGridRow" x:DataType="models:Entitlement">
+                                <Setter Property="Foreground"
+                                        Value="{Binding IsActive, Converter={StaticResource IsActiveToBrushConverter}}" />
+                            </Style>
+                            <Style Selector="DataGridCell.lastColumn">
+                                <Setter Property="Padding" Value="0,0,8,0" />
+                            </Style>
+                        </DataGrid.Styles>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header=""
+                                                    Width="56"
+                                                    CanUserSort="False"
+                                                    CanUserResize="False"
+                                                    IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[0].IsSelected}">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="32"
+                                                Height="32"
+                                                CornerRadius="8"
+                                                ClipToBounds="True"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Background="#FF242424">
+                                            <Image
+                                                Source="{Binding Image, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=36}"
+                                                Width="32"
+                                                Height="32"
+                                                Stretch="Uniform"
+                                                RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Name"
+                                                Binding="{Binding Name}"
+                                                Width="Auto"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[1].IsSelected}" />
+                            <DataGridTextColumn Header="Title ID"
+                                                Binding="{Binding TitleId}"
+                                                Width="Auto"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[2].IsSelected}" />
+                            <DataGridTextColumn Header="Owner"
+                                                Binding="{Binding OwnerOnlineId}"
+                                                Width="Auto"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[3].IsSelected}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Owner"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.IsOwnerFiltered, Converter={StaticResource FilterActiveToBrushConverter}}" />
+                                            <Button Padding="2" Background="Transparent" BorderThickness="0">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ListBox
+                                                            ItemsSource="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableOwners}"
+                                                            Classes="FilterListBox">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <CheckBox Content="{Binding DisplayName}"
+                                                                              IsChecked="{Binding IsSelected}" />
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Platform"
+                                                Binding="{Binding Platform}"
+                                                Width="Auto"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[4].IsSelected}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Platform"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.IsPlatformFiltered, Converter={StaticResource FilterActiveToBrushConverter}}" />
+                                            <Button Padding="2" Background="Transparent" BorderThickness="0">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ListBox
+                                                            ItemsSource="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailablePlatforms}"
+                                                            Classes="FilterListBox">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <CheckBox Content="{Binding DisplayName}"
+                                                                              IsChecked="{Binding IsSelected}" />
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Type"
+                                                Binding="{Binding TypeDisplayString}"
+                                                Width="Auto"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[5].IsSelected}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Type"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.IsTypeFiltered, Converter={StaticResource FilterActiveToBrushConverter}}" />
+                                            <Button Padding="2" Background="Transparent" BorderThickness="0">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ListBox
+                                                            ItemsSource="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableTypes}"
+                                                            Classes="FilterListBox">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <CheckBox Content="{Binding DisplayName}"
+                                                                              IsChecked="{Binding IsSelected}" />
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Retention"
+                                                Binding="{Binding RetentionPolicyDisplayString}"
+                                                Width="Auto"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[6].IsSelected}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Retention"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.IsRetentionsFiltered, Converter={StaticResource FilterActiveToBrushConverter}}" />
+                                            <Button Padding="2" Background="Transparent" BorderThickness="0">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ListBox
+                                                            ItemsSource="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableRetentions}"
+                                                            Classes="FilterListBox">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <CheckBox Content="{Binding DisplayName}"
+                                                                              IsChecked="{Binding IsSelected}" />
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Feature"
+                                                Binding="{Binding FeatureTypeDisplayString}"
+                                                Width="Auto"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[7].IsSelected}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Feature"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.IsFeaturesFiltered, Converter={StaticResource FilterActiveToBrushConverter}}" />
+                                            <Button Padding="2" Background="Transparent" BorderThickness="0">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ListBox
+                                                            ItemsSource="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableFeatures}"
+                                                            Classes="FilterListBox">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <CheckBox Content="{Binding DisplayName}"
+                                                                              IsChecked="{Binding IsSelected}" />
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Membership"
+                                                Binding="{Binding MembershipDisplayString}"
+                                                Width="Auto"
+                                                CellStyleClasses="lastColumn"
+                                                IsVisible="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableColumns[8].IsSelected}">
+                                <DataGridTextColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Membership"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.IsMembershipsFiltered, Converter={StaticResource FilterActiveToBrushConverter}}" />
+                                            <Button Padding="2" Background="Transparent" BorderThickness="0">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ListBox
+                                                            ItemsSource="{Binding $parent[UserControl].((vm:EntitlementsViewModel)DataContext)?.AvailableMemberships}"
+                                                            Classes="FilterListBox">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <CheckBox Content="{Binding DisplayName}"
+                                                                              IsChecked="{Binding IsSelected}" />
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTextColumn.HeaderTemplate>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Column="1"
+                            Width="300"
+                            BorderBrush="#FF242424"
+                            BorderThickness="1,0,0,0"
+                            Padding="12"
+                            IsVisible="{Binding SelectedEntitlement, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <ScrollViewer>
+                            <StackPanel Spacing="8">
+                                <Border Width="128"
+                                        Height="128"
+                                        CornerRadius="8"
+                                        ClipToBounds="True"
+                                        Background="#FF242424"
+                                        HorizontalAlignment="Center"
+                                        Cursor="Hand"
+                                        PointerPressed="EntitlementImage_PointerPressed">
+                                    <Image
+                                        Source="{Binding SelectedEntitlement?.Image, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=128}"
+                                        Stretch="Uniform"
+                                        RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                </Border>
+
+                                <TextBlock Text="{Binding SelectedEntitlement?.Name}"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           TextWrapping="Wrap"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center" />
+
+                                <TextBlock Text="Entitlement Expired"
+                                           FontSize="12"
+                                           Foreground="OrangeRed"
+                                           TextWrapping="Wrap"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center"
+                                           IsVisible="{Binding !SelectedEntitlement.IsActive}" />
+
+                                <Separator Background="#FF242424" />
+
+                                <Button HorizontalAlignment="Center"
+                                        Click="ShowAllForSelectedEntitlement_Click">
+                                    <TextBlock
+                                        Text="{Binding SelectedEntitlement?.TitleId, StringFormat='Show all for {0}'}" />
+                                </Button>
+
+                                <Separator Background="#FF242424" />
+
+                                <StackPanel>
+                                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto">
+                                        <TextBlock Grid.Row="0"
+                                                   Grid.Column="0"
+                                                   Text="Title ID:"
+                                                   Foreground="#FF9A9A9A"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="0"
+                                                   Grid.Column="1"
+                                                   Text="{Binding SelectedEntitlement?.TitleId}"
+                                                   Cursor="Hand"
+                                                   PointerPressed="CopyToClipboard_PointerPressed" />
+                                        <TextBlock Grid.Row="2"
+                                                   Grid.Column="0"
+                                                   Text="Entitlement ID:"
+                                                   Foreground="#FF9A9A9A"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="2"
+                                                   Grid.Column="1"
+                                                   Text="{Binding SelectedEntitlement?.EntitlementId}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="11"
+                                                   Cursor="Hand"
+                                                   PointerPressed="CopyToClipboard_PointerPressed" />
+                                        <TextBlock Grid.Row="4"
+                                                   Grid.Column="0"
+                                                   Text="Product ID:"
+                                                   Foreground="#FF9A9A9A"
+                                                   Margin="0,0,8,4" />
+                                        <TextBlock Grid.Row="4"
+                                                   Grid.Column="1"
+                                                   Text="{Binding SelectedEntitlement?.ProductId}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="11"
+                                                   Cursor="Hand"
+                                                   PointerPressed="CopyToClipboard_PointerPressed" />
+                                        <TextBlock Grid.Row="6" Grid.Column="0"
+                                                   Text="URL:"
+                                                   Foreground="#FF9A9A9A"
+                                                   Margin="0,0,8,4"
+                                                   IsVisible="{Binding SelectedEntitlement?.HasReferencePackageUrl}" />
+                                        <TextBlock Grid.Row="6" Grid.Column="1"
+                                                   Text="{Binding SelectedEntitlement?.ReferencePackageUrl, TargetNullValue='Missing'}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="11"
+                                                   IsVisible="{Binding SelectedEntitlement?.HasReferencePackageUrl}"
+                                                   Cursor="Hand"
+                                                   PointerPressed="Url_PointerPressed" />
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Name="ImageOverlay"
+              IsVisible="{Binding IsImageOverlayVisible}"
+              Background="#80000000"
+              PointerPressed="ImageOverlay_PointerPressed">
+            <Border Background="#202020"
+                    BorderBrush="#404040"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    ClipToBounds="True"
+                    BoxShadow="0 4 20 0 #80000000"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="40">
+                <Image Source="{Binding FullImageBytes, Converter={StaticResource ByteArrayToBitmapConverter}}"
+                       Stretch="Uniform"
+                       PointerPressed="FullImage_PointerPressed"
+                       Cursor="Hand"
+                       RenderOptions.BitmapInterpolationMode="HighQuality" />
+            </Border>
+        </Grid>
+        <Border Name="CopiedMessage"
+                Background="#CC000000"
+                CornerRadius="20"
+                Padding="16,8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,48"
+                IsHitTestVisible="False"
+                Opacity="0">
+            <Border.Transitions>
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.5" />
+                </Transitions>
+            </Border.Transitions>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <codicons:PackIconCodicons Kind="Check" Width="16" Height="16" Foreground="#FF4CAF50" />
+                <TextBlock Text="Copied to clipboard"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           FontWeight="Medium" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

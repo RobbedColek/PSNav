@@ -1,0 +1,77 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="640"
+        d:DesignHeight="210"
+        x:Class="PSNav.Views.Accounts.AddAccountWindow"
+        Title="Add account"
+        Width="640"
+        Height="210"
+        MinWidth="640"
+        MinHeight="210"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="BorderOnly"
+        CanResize="False">
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          Margin="20"
+          RowSpacing="10">
+        <StackPanel Grid.Row="0"
+                    Spacing="8">
+            <TextBlock Text="Add account"
+                       FontSize="24"
+                       FontWeight="SemiBold" />
+
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="#FFBDBDBD">
+                <Run Text="Open " />
+                <Button Content="https://ca.account.sony.com/api/v1/ssocookie"
+                        Click="OpenSsoCookieUrl_Click"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Foreground="#FF64B5F6"
+                        Cursor="Hand" />
+                <Run Text=" in your browser while signed in to PlayStation Network, then paste the JSON output below." />
+            </TextBlock>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1"
+                    Spacing="8">
+            <TextBox x:Name="SsoCookieJsonTextBox"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     VerticalContentAlignment="Top"
+                     MinHeight="34"
+                     Watermark="{}{ &quot;npsso&quot;: &quot;&lt;NPSSO_TOKEN&gt;&quot;, &quot;expires_in&quot;: XXXXXX }" />
+
+            <TextBlock x:Name="ErrorTextBlock"
+                       Foreground="#FFFF6B6B"
+                       TextWrapping="Wrap"
+                       IsVisible="False" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+            <ProgressBar x:Name="AddAccountProgressBar"
+                         Width="90"
+                         Height="18"
+                         VerticalAlignment="Center"
+                         IsIndeterminate="True"
+                         IsVisible="False" />
+
+            <Button MinWidth="90"
+                    Content="Cancel"
+                    Click="Cancel_Click" />
+
+            <Button x:Name="AddAccountButton"
+                    MinWidth="110"
+                    Content="Add account"
+                    Click="Add_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

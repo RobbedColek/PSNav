@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:PSNav.Converters"
+        xmlns:shell="clr-namespace:PSNav.Views.Shell"
+
+        mc:Ignorable="d"
+        d:DesignWidth="1280"
+        d:DesignHeight="720"
+
+        x:Class="PSNav.Views.Shell.MainWindow"
+        WindowStartupLocation="Manual"
+        RequestedThemeVariant="Dark"
+
+        SystemDecorations="BorderOnly"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="40">
+
+    <Window.Resources>
+        <converters:BoolToBlurRadiusConverter x:Key="BlurRadiusConverter" />
+    </Window.Resources>
+
+    <shell:AppShell x:Name="Shell"
+                    TitleText="PSN Account Vault">
+        <shell:AppShell.Effect>
+            <BlurEffect
+                Radius="{Binding IsBlurred, 
+                                 RelativeSource={RelativeSource AncestorType=shell:MainWindow}, 
+                                 Converter={StaticResource BlurRadiusConverter}}" />
+        </shell:AppShell.Effect>
+    </shell:AppShell>
+</Window>

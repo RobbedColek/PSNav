@@ -1,0 +1,90 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.3.14"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.13"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.14"/>
+        <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.14"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.14"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.14">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+        <PackageReference Include="IconPacks.Avalonia.BootstrapIcons" Version="1.3.1"/>
+        <PackageReference Include="IconPacks.Avalonia.Codicons" Version="1.3.1"/>
+        <PackageReference Include="IconPacks.Avalonia.PhosphorIcons" Version="1.3.1"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.116.1"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" Version="3.116.1"/>
+        <PackageReference Include="System.Reactive" Version="6.1.0"/>
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.7"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="App.axaml.cs">
+            <DependentUpon>App.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Common\ConfirmDialog.axaml.cs">
+            <DependentUpon>ConfirmDialog.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Accounts\AccountsView.axaml.cs">
+            <DependentUpon>AccountsView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Accounts\AddAccountWindow.axaml.cs">
+            <DependentUpon>AddAccountWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Accounts\AddOfflineAccountWindow.axaml.cs">
+            <DependentUpon>AddOfflineAccountWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Consoles\ConsolesView.axaml.cs">
+            <DependentUpon>ConsolesView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Consoles\RegisterConsoleWindow.axaml.cs">
+            <DependentUpon>RegisterConsoleWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Shell\AppShell.axaml.cs">
+            <DependentUpon>AppShell.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Shell\MainWindow.axaml.cs">
+            <DependentUpon>MainWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Entitlements\EntitlementsView.axaml.cs">
+            <DependentUpon>EntitlementsView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Patches\PatchesView.axaml.cs">
+            <DependentUpon>PatchesView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="Views\Accounts\AccountsView.axaml"/>
+        <AdditionalFiles Include="Views\Accounts\AddAccountWindow.axaml"/>
+        <AdditionalFiles Include="Views\Accounts\AddOfflineAccountWindow.axaml"/>
+        <AdditionalFiles Include="Views\Common\ConfirmDialog.axaml"/>
+        <AdditionalFiles Include="Views\Consoles\ConsolesView.axaml"/>
+        <AdditionalFiles Include="Views\Consoles\RegisterConsoleWindow.axaml"/>
+        <AdditionalFiles Include="Views\Entitlements\EntitlementsView.axaml"/>
+        <AdditionalFiles Include="Views\Shell\AppShell.axaml"/>
+        <AdditionalFiles Include="Views\Shell\MainWindow.axaml"/>
+    </ItemGroup>
+</Project>

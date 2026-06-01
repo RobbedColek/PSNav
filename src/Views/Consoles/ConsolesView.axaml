@@ -1,0 +1,193 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:modelsConsoles="clr-namespace:PSNav.Models.Consoles"
+             xmlns:modelsAccounts="clr-namespace:PSNav.Models.Accounts"
+             xmlns:converters="clr-namespace:PSNav.Converters"
+             xmlns:iconPacks="clr-namespace:IconPacks.Avalonia.Codicons;assembly=IconPacks.Avalonia.Codicons"
+             xmlns:vm="clr-namespace:PSNav.ViewModels.Consoles"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
+             x:Class="PSNav.Views.Consoles.ConsolesView"
+             x:DataType="vm:ConsolesViewModel">
+
+    <UserControl.Resources>
+        <converters:AccountByIdConverter x:Key="AccountByIdConverter" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*"
+          RowSpacing="8">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Text="Consoles"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Click="RegisterConsole_Click">
+                <iconPacks:PackIconCodicons Kind="Add"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+            </Button>
+        </Grid>
+
+        <StackPanel Grid.Row="1"
+                    IsVisible="{Binding IsUpdating}"
+                    Spacing="8"
+                    Margin="0,0,0,16">
+            <TextBlock Text="{Binding UpdateStatus}"
+                       Foreground="#FF9A9A9A"
+                       FontSize="12" />
+            <ProgressBar Value="{Binding UpdateProgress}"
+                         Minimum="0"
+                         Maximum="100"
+                         Height="4"
+                         Background="#FF242424"
+                         Foreground="#FF0078D4" />
+        </StackPanel>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,4*">
+            <Grid.IsVisible>
+                <Binding Path="IsUpdating" Converter="{x:Static BoolConverters.Not}" />
+            </Grid.IsVisible>
+            <Border Grid.Column="0"
+                    Background="#FF101010"
+                    BorderBrush="#FF242424"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="12"
+                    Margin="0,0,8,0">
+                <ListBox ItemsSource="{Binding Consoles}"
+                         SelectedItem="{Binding SelectedConsole}"
+                         Background="Transparent">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="modelsConsoles:ConsoleModel">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                    <Button Click="ImportEntitlements_Click"
+                                            ToolTip.Tip="Import entitlements.db"
+                                            Background="Transparent"
+                                            Padding="4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <iconPacks:PackIconCodicons Kind="Refresh"
+                                                                    Width="14"
+                                                                    Height="14"
+                                                                    Foreground="#FF9A9A9A" />
+                                    </Button>
+                                    <Button Click="DeleteConsole_Click"
+                                            ToolTip.Tip="Delete Console"
+                                            Background="Transparent"
+                                            Padding="4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <iconPacks:PackIconCodicons Kind="Trash"
+                                                                    Width="14"
+                                                                    Height="14"
+                                                                    Foreground="#FF9A9A9A" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Background="#FF101010"
+                    BorderBrush="#FF242424"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    ClipToBounds="True"
+                    Padding="0"
+                    Margin="8,0,0,0"
+                    IsVisible="{Binding SelectedConsole, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Grid RowDefinitions="Auto,*">
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding SelectedConsoleProfiles}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="False"
+                              Background="Transparent">
+                        <DataGrid.Styles>
+                            <Style Selector="DataGridColumnHeader">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                                <Setter Property="IsVisible" Value="False" />
+                            </Style>
+                            <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                                <Setter Property="IsVisible" Value="False" />
+                            </Style>
+                        </DataGrid.Styles>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name"
+                                                Binding="{Binding Name}"
+                                                IsReadOnly="True"
+                                                Width="*"
+                                                CanUserSort="False" />
+                            <DataGridTextColumn Header="Entitlements"
+                                                Binding="{Binding EntitlementCount}"
+                                                IsReadOnly="True"
+                                                Width="Auto"
+                                                CanUserSort="False" />
+                            <DataGridTemplateColumn Header="Account ID"
+                                                    Width="Auto"
+                                                    CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="modelsConsoles:ConsoleProfile">
+                                        <Grid VerticalAlignment="Center" Margin="12,0">
+                                            <TextBlock Text="- - -"
+                                                       IsVisible="{Binding AccountId, Converter={x:Static ObjectConverters.IsNull}}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8"
+                                                        IsVisible="{Binding AccountId, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                                <TextBlock Text="{Binding OnlineId}" />
+                                                <TextBlock Text="{Binding AccountId}" Foreground="#FF9A9A9A"
+                                                           FontSize="10" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate x:DataType="modelsConsoles:ConsoleProfile">
+                                        <ComboBox
+                                            ItemsSource="{Binding $parent[UserControl].((vm:ConsolesViewModel)DataContext)?.AvailableAccounts}"
+                                            HorizontalAlignment="Stretch"
+                                            SelectionChanged="AccountComboBox_SelectionChanged">
+                                            <ComboBox.SelectedItem>
+                                                <MultiBinding Converter="{StaticResource AccountByIdConverter}"
+                                                              Mode="TwoWay">
+                                                    <Binding Path="AccountId" Mode="TwoWay"
+                                                             UpdateSourceTrigger="PropertyChanged" />
+                                                    <Binding
+                                                        Path="$parent[UserControl].((vm:ConsolesViewModel)DataContext)?.AvailableAccounts" />
+                                                </MultiBinding>
+                                            </ComboBox.SelectedItem>
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate x:DataType="modelsAccounts:Account">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="{Binding OnlineId}" />
+                                                        <TextBlock Text="{Binding AccountId}" Foreground="#FF9A9A9A"
+                                                                   FontSize="10" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
