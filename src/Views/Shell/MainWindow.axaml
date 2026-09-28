@@ -11,6 +11,7 @@
 
         x:Class="PSNav.Views.Shell.MainWindow"
         WindowStartupLocation="Manual"
+        Icon="/app.ico"
         RequestedThemeVariant="Dark"
 
         SystemDecorations="BorderOnly"
