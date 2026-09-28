@@ -8,16 +8,53 @@ namespace PSNav.Infrastructure.Database;
 public sealed class DatabaseService : IDatabaseService, IDisposable
 {
     private const string DatabaseFileName = "PSNav.db";
+    private const string AppDataFolderName = "PSNav";
     private readonly string _connectionString;
     private SqliteConnection? _connection;
     private readonly Lock _lock = new();
 
     public DatabaseService()
     {
-        string databasePath = Path.Combine(AppContext.BaseDirectory, DatabaseFileName);
+        string databasePath = ResolveDatabasePath();
         _connectionString = $"Filename={databasePath}";
 
-        Initialize();
+        Initialize(_connectionString);
+    }
+
+    private static string ResolveDatabasePath()
+    {
+        string directory = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            AppDataFolderName);
+        Directory.CreateDirectory(directory);
+
+        string databasePath = Path.Combine(directory, DatabaseFileName);
+        MigrateLegacyDatabase(databasePath);
+        return databasePath;
+    }
+
+    private static void MigrateLegacyDatabase(string databasePath)
+    {
+        string legacyPath = Path.Combine(AppContext.BaseDirectory, DatabaseFileName);
+        if (File.Exists(databasePath) || !File.Exists(legacyPath)) return;
+
+        try
+        {
+            foreach (var suffix in new[] { "", "-wal", "-shm" })
+            {
+                if (File.Exists(legacyPath + suffix))
+                {
+                    File.Move(legacyPath + suffix, databasePath + suffix);
+                }
+            }
+        }
+        catch (IOException)
+        {
+            // Nothing
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 
     public SqliteConnection GetConnection()
@@ -45,11 +82,9 @@ public sealed class DatabaseService : IDatabaseService, IDisposable
         }
     }
 
-    private static void Initialize()
+    private static void Initialize(string connectionString)
     {
-        string databasePath = Path.Combine(AppContext.BaseDirectory, DatabaseFileName);
-
-        using SqliteConnection connection = new($"Filename={databasePath}");
+        using SqliteConnection connection = new(connectionString);
         connection.Open();
 
         using SqliteCommand command = connection.CreateCommand();
