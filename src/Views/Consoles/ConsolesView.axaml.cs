@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -74,7 +76,14 @@ public partial class ConsolesView : UserControl
 
         if (filePath != null)
         {
-            await _viewModel.UpdateConsole(_viewModel.SelectedConsole.Id!.Value, filePath);
+            try
+            {
+                await _viewModel.UpdateConsole(_viewModel.SelectedConsole.Id!.Value, filePath);
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync("Failed to import entitlements", ex);
+            }
         }
     }
 
@@ -108,7 +117,30 @@ public partial class ConsolesView : UserControl
 
         if (shouldRegister && name != null && profileIds != null && filePath != null)
         {
-            await _viewModel.RegisterConsole(name, filePath);
+            try
+            {
+                await _viewModel.RegisterConsole(name, filePath);
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync("Failed to register console", ex);
+            }
+        }
+    }
+
+    private async Task ShowErrorAsync(string title, Exception exception)
+    {
+        MainWindow? mainWindow = VisualRoot as MainWindow;
+        mainWindow?.IsBlurred = true;
+
+        try
+        {
+            ErrorDialog dialog = new(title, exception.Message);
+            await dialog.ShowDialog(mainWindow ?? (Window)VisualRoot!);
+        }
+        finally
+        {
+            mainWindow?.IsBlurred = false;
         }
     }
 

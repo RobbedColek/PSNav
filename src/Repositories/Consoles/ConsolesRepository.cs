@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -255,30 +256,35 @@ public sealed class ConsolesRepository(
                     JsonElement root = jsonDocument.RootElement;
 
                     string titleId = root.GetProperty("id").GetString()!.Split('-')[1];
-                    string? branding = root.TryGetProperty("branding", out JsonElement brandingElem)
+                    string? branding = TryGetAny(root, out JsonElement brandingElem, "branding")
                         ? brandingElem.GetString()
                         : null;
-                    int entitlementType = root.GetProperty("entitlement_type").GetInt32();
-                    int featureType = root.GetProperty("feature_type").GetInt32();
+                    int entitlementType = GetRequired(root, entitlementId, "entitlement_type", "entitlementType")
+                        .GetInt32();
+                    int featureType = GetRequired(root, entitlementId, "feature_type", "featureType").GetInt32();
 
                     string? platform = null;
                     string? referencePackageUrl = null;
                     long? packageFileSize = null;
 
-                    if (root.TryGetProperty("entitlement_attributes", out JsonElement entitlementAttributesElement) &&
+                    if (TryGetAny(root, out JsonElement entitlementAttributesElement, "entitlement_attributes",
+                            "entitlementAttributes") &&
                         entitlementAttributesElement.GetArrayLength() > 0)
                     {
                         JsonElement firstAttr = entitlementAttributesElement[0];
-                        platform = firstAttr.TryGetProperty("platform_id", out JsonElement platformIdElement)
+                        platform = TryGetAny(firstAttr, out JsonElement platformIdElement, "platform_id", "platformId")
                             ? platformIdElement.GetString()
                             : null;
                         referencePackageUrl =
-                            firstAttr.TryGetProperty("reference_package_url", out JsonElement refPkgUrlElement)
+                            TryGetAny(firstAttr, out JsonElement refPkgUrlElement, "reference_package_url",
+                                "referencePackageUrl")
                                 ? refPkgUrlElement.GetString()
                                 : null;
-                        packageFileSize = firstAttr.TryGetProperty("package_file_size", out JsonElement pkgSizeElement)
-                            ? pkgSizeElement.GetInt64()
-                            : null;
+                        packageFileSize =
+                            TryGetAny(firstAttr, out JsonElement pkgSizeElement, "package_file_size",
+                                "packageFileSize")
+                                ? pkgSizeElement.GetInt64()
+                                : null;
                     }
 
                     string? name = null;
@@ -286,23 +292,25 @@ public sealed class ConsolesRepository(
                     string? type = null;
                     string? imageUrl = null;
 
-                    if (root.TryGetProperty("game_meta", out JsonElement gameMetaElement))
+                    if (TryGetAny(root, out JsonElement gameMetaElement, "game_meta", "gameMeta"))
                     {
                         name = gameMetaElement.GetProperty("name").GetString();
-                        packageType = gameMetaElement.TryGetProperty("package_type", out JsonElement pkgTypeElem)
+                        packageType = TryGetAny(gameMetaElement, out JsonElement pkgTypeElem, "package_type",
+                            "packageType")
                             ? pkgTypeElem.GetString()
                             : null;
-                        type = gameMetaElement.TryGetProperty("type", out JsonElement typeElem)
+                        type = TryGetAny(gameMetaElement, out JsonElement typeElem, "type")
                             ? typeElem.GetString()
                             : null;
-                        imageUrl = gameMetaElement.TryGetProperty("icon_url", out JsonElement iconUrlElem)
+                        imageUrl = TryGetAny(gameMetaElement, out JsonElement iconUrlElem, "icon_url", "iconUrl")
                             ? iconUrlElem.GetString()
                             : null;
                     }
 
-                    if (imageUrl == null && root.TryGetProperty("product_meta", out JsonElement productMetaElement))
+                    if (imageUrl == null &&
+                        TryGetAny(root, out JsonElement productMetaElement, "product_meta", "productMeta"))
                     {
-                        imageUrl = productMetaElement.TryGetProperty("image_url", out JsonElement iconUrlElem)
+                        imageUrl = TryGetAny(productMetaElement, out JsonElement iconUrlElem, "image_url", "imageUrl")
                             ? iconUrlElem.GetString()
                             : null;
                     }
@@ -325,26 +333,27 @@ public sealed class ConsolesRepository(
                         });
                     }
 
-                    string? productId = root.TryGetProperty("product_id", out JsonElement prodIdElem)
+                    string? productId = TryGetAny(root, out JsonElement prodIdElem, "product_id", "productId")
                         ? prodIdElem.GetString()
                         : null;
                     string? membership = null;
                     int? retentionPolicy = null;
-                    if (root.TryGetProperty("reward_meta", out JsonElement rewardMetaElement))
+                    if (TryGetAny(root, out JsonElement rewardMetaElement, "reward_meta", "rewardMeta"))
                     {
                         membership =
-                            rewardMetaElement.TryGetProperty("reward_membership_type",
-                                out JsonElement rewardMemTypeElem)
+                            TryGetAny(rewardMetaElement, out JsonElement rewardMemTypeElem,
+                                "reward_membership_type", "rewardMembershipType")
                                 ? rewardMemTypeElem.GetString()
                                 : null;
                         retentionPolicy =
-                            rewardMetaElement.TryGetProperty("retention_policy", out JsonElement retentionPolicyElem)
+                            TryGetAny(rewardMetaElement, out JsonElement retentionPolicyElem, "retention_policy",
+                                "retentionPolicy")
                                 ? retentionPolicyElem.GetInt32()
                                 : null;
                     }
 
                     DateTimeOffset? inactiveDate =
-                        root.TryGetProperty("inactive_date", out JsonElement inactiveDateElement)
+                        TryGetAny(root, out JsonElement inactiveDateElement, "inactive_date", "inactiveDate")
                             ? DateTimeOffset.Parse(inactiveDateElement.GetString()!)
                             : null;
 
@@ -565,6 +574,32 @@ public sealed class ConsolesRepository(
         command.CommandText = "DELETE FROM ConsoleProfiles WHERE ProfileID = @id";
         command.Parameters.AddWithValue("@id", profileId);
         command.ExecuteNonQuery();
+    }
+
+    // Entitlement JSON uses snake_case keys on PS4 exports and camelCase keys on PS5 exports
+    private static bool TryGetAny(JsonElement element, out JsonElement value, params string[] names)
+    {
+        foreach (string name in names)
+        {
+            if (element.TryGetProperty(name, out value))
+            {
+                return true;
+            }
+        }
+
+        value = default;
+        return false;
+    }
+
+    private static JsonElement GetRequired(JsonElement element, string entitlementId, params string[] names)
+    {
+        if (TryGetAny(element, out JsonElement value, names))
+        {
+            return value;
+        }
+
+        throw new InvalidDataException(
+            $"Entitlement '{entitlementId}' is missing required property '{string.Join("' / '", names)}'.");
     }
 
     private static ConsoleModel ReadConsole(SqliteDataReader reader)

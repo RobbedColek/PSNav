@@ -123,10 +123,11 @@ public sealed partial class ConsolesViewModel : ViewModelBase
         IsUpdating = true;
         UpdateProgress = 0;
 
+        ConsoleModel console = new() { Name = name };
+
         try
         {
             UpdateStatus = "Creating console...";
-            ConsoleModel console = new() { Name = name };
             _consolesRepository.UpsertConsole(console);
 
             if (console.Id.HasValue)
@@ -142,6 +143,15 @@ public sealed partial class ConsolesViewModel : ViewModelBase
 
                 await _consolesRepository.UpdateEntitlements(console.Id.Value, entitlementsFilePath, progress);
             }
+        }
+        catch
+        {
+            if (console.Id.HasValue)
+            {
+                _consolesRepository.DeleteConsole(console.Id.Value);
+            }
+
+            throw;
         }
         finally
         {

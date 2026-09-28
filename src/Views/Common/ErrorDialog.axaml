@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="480"
+        d:DesignHeight="240"
+        x:Class="PSNav.Views.Common.ErrorDialog"
+        Title="Error"
+        Width="520"
+        Height="240"
+        MinWidth="520"
+        MinHeight="240"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="BorderOnly"
+        CanResize="False">
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          Margin="20"
+          RowSpacing="10">
+        <TextBlock Grid.Row="0"
+                   x:Name="TitleTextBlock"
+                   Text="Something went wrong"
+                   FontSize="24"
+                   FontWeight="SemiBold" />
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto">
+            <SelectableTextBlock x:Name="MessageTextBlock"
+                                 TextWrapping="Wrap"
+                                 Foreground="#FFBDBDBD" />
+        </ScrollViewer>
+
+        <Button Grid.Row="2"
+                HorizontalAlignment="Right"
+                MinWidth="90"
+                Content="OK"
+                Click="Ok_Click" />
+    </Grid>
+</Window>
