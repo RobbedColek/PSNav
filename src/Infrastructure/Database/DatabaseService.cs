@@ -218,6 +218,13 @@ public sealed class DatabaseService : IDatabaseService, IDisposable
                 FOREIGN KEY (EntitlementID) REFERENCES Entitlements (EntitlementID)
             );
 
+            CREATE TABLE IF NOT EXISTS Settings
+            (
+                Key TEXT NOT NULL PRIMARY KEY,
+                Value TEXT NOT NULL,
+                UpdatedAt INTEGER NOT NULL DEFAULT (unixepoch())
+            );
+
             CREATE INDEX IF NOT EXISTS IX_Entitlements_Name 
                 ON Entitlements (Name COLLATE NOCASE);
 

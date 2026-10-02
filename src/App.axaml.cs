@@ -5,10 +5,12 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Infrastructure.Database;
 using PSNav.Infrastructure.PlayStationApi;
+using PSNav.Infrastructure.Windowing;
 using PSNav.Repositories.Accounts;
 using PSNav.Repositories.Consoles;
 using PSNav.Repositories.Entitlements;
 using PSNav.Repositories.Patches;
+using PSNav.Repositories.Settings;
 using PSNav.Services.Accounts;
 using PSNav.Services.Patches;
 using PSNav.ViewModels.Accounts;
@@ -42,6 +44,8 @@ public class App : Application
         services.AddSingleton<IEntitlementsRepository, EntitlementsRepository>();
         services.AddSingleton<IConsolesRepository, ConsolesRepository>();
         services.AddSingleton<IPatchesRepository, PatchesRepository>();
+        services.AddSingleton<ISettingsRepository, SettingsRepository>();
+        services.AddSingleton<IWindowPlacementStore, WindowPlacementStore>();
         services.AddSingleton<IAccountService, AccountService>();
         services.AddSingleton<IPatchService, PatchService>();
 

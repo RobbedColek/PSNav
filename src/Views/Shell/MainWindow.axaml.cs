@@ -2,8 +2,8 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
+using PSNav.Infrastructure.Windowing;
 using PSNav.ViewModels.Shell;
 
 namespace PSNav.Views.Shell;
@@ -22,28 +22,14 @@ public partial class MainWindow : Window
         set => SetAndRaise(IsBlurredProperty, ref field, value);
     }
 
-    private void OnOpened(object? sender, EventArgs e)
-    {
-        Screen? screen = Screens.Primary;
-        if (screen is null) return;
-
-        PixelRect workingArea = screen.WorkingArea;
-
-        Width  = workingArea.Width / screen.Scaling * 0.9;
-        Height = workingArea.Height / screen.Scaling * 0.9;
-
-        Position = new PixelPoint(
-            workingArea.X + (int)((workingArea.Width  - Width  * screen.Scaling) / 2),
-            workingArea.Y + (int)((workingArea.Height - Height * screen.Scaling) / 2)
-        );
-    }
-
     public MainWindow()
     {
         InitializeComponent();
-        Opened += OnOpened;
 
-        DataContext = App.GetServices().GetRequiredService<MainViewModel>();
+        IServiceProvider services = App.GetServices();
+        DataContext = services.GetRequiredService<MainViewModel>();
+
+        WindowPlacementTracker.Attach(this, services.GetRequiredService<IWindowPlacementStore>(), "MainWindow");
 
         AppShell? shell = this.FindControl<AppShell>("Shell");
         BlurEffect? blurEffect = shell?.Effect as BlurEffect;
