@@ -37,6 +37,7 @@
         <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" Version="3.116.1"/>
         <PackageReference Include="System.Reactive" Version="6.1.0"/>
         <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.7"/>
+        <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3"/>
     </ItemGroup>
 
     <ItemGroup>
