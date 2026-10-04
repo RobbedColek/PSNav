@@ -4,18 +4,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         d:DesignWidth="640"
-        d:DesignHeight="210"
         x:Class="PSNav.Views.Accounts.AddAccountWindow"
         Title="Add account"
         Width="640"
-        Height="210"
-        MinWidth="640"
-        MinHeight="210"
+        SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         SystemDecorations="BorderOnly"
         CanResize="False">
 
-    <Grid RowDefinitions="Auto,*,Auto"
+    <Grid RowDefinitions="Auto,Auto,Auto"
           Margin="20"
           RowSpacing="10">
         <StackPanel Grid.Row="0"
@@ -24,18 +21,14 @@
                        FontSize="24"
                        FontWeight="SemiBold" />
 
-            <TextBlock TextWrapping="Wrap"
-                       Foreground="#FFBDBDBD">
-                <Run Text="Open " />
-                <Button Content="https://ca.account.sony.com/api/v1/ssocookie"
-                        Click="OpenSsoCookieUrl_Click"
-                        Padding="0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Foreground="#FF64B5F6"
-                        Cursor="Hand" />
-                <Run Text=" in your browser while signed in to PlayStation Network, then paste the JSON output below." />
-            </TextBlock>
+            <TextBlock Text="Open the following link in your browser while signed in to PlayStation Network, then paste the JSON output below."
+                       TextWrapping="Wrap"
+                       Foreground="#FFBDBDBD" />
+
+            <HyperlinkButton Content="https://ca.account.sony.com/api/v1/ssocookie"
+                             NavigateUri="https://ca.account.sony.com/api/v1/ssocookie"
+                             Padding="0"
+                             Foreground="#FF64B5F6" />
         </StackPanel>
 
         <StackPanel Grid.Row="1"
@@ -44,7 +37,8 @@
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      VerticalContentAlignment="Top"
-                     MinHeight="34"
+                     MinHeight="60"
+                     MaxHeight="120"
                      Watermark="{}{ &quot;npsso&quot;: &quot;&lt;NPSSO_TOKEN&gt;&quot;, &quot;expires_in&quot;: XXXXXX }" />
 
             <TextBlock x:Name="ErrorTextBlock"

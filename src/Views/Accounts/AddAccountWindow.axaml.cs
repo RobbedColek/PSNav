@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using Avalonia.Controls;
@@ -12,7 +11,6 @@ namespace PSNav.Views.Accounts;
 
 public partial class AddAccountWindow : Window
 {
-    private const string SsoCookieUrl = "https://ca.account.sony.com/api/v1/ssocookie";
     private readonly IAccountService _accountService;
 
     public AddAccountWindow()
@@ -47,15 +45,6 @@ public partial class AddAccountWindow : Window
         {
             SetIsAddingAccount(false);
         }
-    }
-
-    private void OpenSsoCookieUrl_Click(object? sender, RoutedEventArgs e)
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = SsoCookieUrl,
-            UseShellExecute = true
-        });
     }
 
     private void ShowError(string message)
