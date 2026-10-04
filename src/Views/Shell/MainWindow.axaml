@@ -10,6 +10,7 @@
         d:DesignHeight="720"
 
         x:Class="PSNav.Views.Shell.MainWindow"
+        Title="PSN Account Vault"
         WindowStartupLocation="Manual"
         MinWidth="770"
         MinHeight="330"
