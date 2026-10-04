@@ -14,6 +14,8 @@ namespace PSNav.Services.Accounts;
 public sealed class AccountService(IEntitlementsRepository entitlementsRepository, IPlayStationApiClient apiClient)
     : IAccountService
 {
+    private const int NpssoTokenLength = 64;
+
     public async Task<Account> CreateAccountFromSsoCookieJsonAsync(string json)
     {
         if (string.IsNullOrWhiteSpace(json))
@@ -44,10 +46,16 @@ public sealed class AccountService(IEntitlementsRepository entitlementsRepositor
         if (response.ExpiresIn <= 0)
             throw new InvalidOperationException("The JSON must contain an \"expires_in\" value greater than zero.");
 
-        PlayStationAccountIdentity identity =
-            await apiClient.GetAccountIdentityFromNpssoAsync(response.Npsso);
+        if (response.Npsso.Length != NpssoTokenLength)
+            throw new InvalidOperationException($"The \"npsso\" value must be exactly {NpssoTokenLength} characters long.");
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        if (response.ExpiresIn > (long)(DateTimeOffset.MaxValue - now).TotalSeconds)
+            throw new InvalidOperationException("The \"expires_in\" value is too large.");
+
+        PlayStationAccountIdentity identity =
+            await apiClient.GetAccountIdentityFromNpssoAsync(response.Npsso);
 
         return new Account
         {
