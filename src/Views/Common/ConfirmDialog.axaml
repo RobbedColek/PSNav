@@ -37,11 +37,11 @@
                     HorizontalAlignment="Right"
                     Spacing="8">
             <Button MinWidth="90"
-                    Content="No"
-                    Click="No_Click" />
-            <Button MinWidth="90"
                     Content="Yes"
                     Click="Yes_Click" />
+            <Button MinWidth="90"
+                    Content="No"
+                    Click="No_Click" />
         </StackPanel>
     </Grid>
 </Window>

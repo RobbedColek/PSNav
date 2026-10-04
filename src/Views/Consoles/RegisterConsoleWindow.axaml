@@ -64,13 +64,13 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Spacing="8">
-            <Button MinWidth="90"
-                    Content="Cancel"
-                    Click="Cancel_Click" />
             <Button x:Name="RegisterButton"
                     MinWidth="110"
                     Content="Register"
                     Click="Register_Click" />
+            <Button MinWidth="90"
+                    Content="Cancel"
+                    Click="Cancel_Click" />
         </StackPanel>
     </Grid>
 </Window>

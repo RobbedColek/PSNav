@@ -64,14 +64,14 @@
                          IsIndeterminate="True"
                          IsVisible="False" />
 
-            <Button MinWidth="90"
-                    Content="Cancel"
-                    Click="Cancel_Click" />
-
             <Button x:Name="AddAccountButton"
                     MinWidth="110"
                     Content="Add account"
                     Click="Add_Click" />
+
+            <Button MinWidth="90"
+                    Content="Cancel"
+                    Click="Cancel_Click" />
         </StackPanel>
     </Grid>
 </Window>
