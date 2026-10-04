@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using Avalonia.Controls;
+using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Models.Accounts;
 using PSNav.ViewModels.Accounts;
@@ -67,6 +69,7 @@ public partial class AccountsView : UserControl
             {
                 AccountId = accountId,
                 OnlineId = onlineId,
+                AvatarPicture = LoadOfflineAccountAvatar(),
                 CreatedAt = DateTimeOffset.Now,
                 UpdatedAt = DateTimeOffset.Now
             };
@@ -77,6 +80,14 @@ public partial class AccountsView : UserControl
         {
             owner.IsBlurred = false;
         }
+    }
+
+    private static byte[] LoadOfflineAccountAvatar()
+    {
+        using Stream stream = AssetLoader.Open(new Uri("avares://PSNav/Assets/OfflineAccountAvatar.webp"));
+        using MemoryStream buffer = new();
+        stream.CopyTo(buffer);
+        return buffer.ToArray();
     }
 
     private async void RefreshAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

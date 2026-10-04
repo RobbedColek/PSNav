@@ -15,6 +15,7 @@
     </PropertyGroup>
     <ItemGroup>
         <AvaloniaResource Include="app.ico"/>
+        <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.14"/>
