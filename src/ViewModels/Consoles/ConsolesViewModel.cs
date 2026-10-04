@@ -22,6 +22,7 @@ public sealed partial class ConsolesViewModel : ViewModelBase
         _accountRepository = accountRepository;
         _consolesRepository = consolesRepository;
         WeakReferenceMessenger.Default.Register<AccountAddedMessage>(this, (_, _) => RefreshConsoles());
+        WeakReferenceMessenger.Default.Register<AccountDeletedMessage>(this, (_, _) => RefreshConsoles());
     }
 
     public ObservableCollection<ConsoleModel> Consoles { get; } = [];

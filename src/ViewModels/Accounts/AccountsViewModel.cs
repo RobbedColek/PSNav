@@ -80,6 +80,7 @@ public sealed partial class AccountsViewModel(IAccountsRepository accountReposit
         accountRepository.Delete(account.AccountId);
 
         RefreshAccounts();
+        WeakReferenceMessenger.Default.Send(new AccountDeletedMessage());
     }
 
     [RelayCommand]
