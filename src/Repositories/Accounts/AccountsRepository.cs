@@ -192,6 +192,8 @@ public sealed class AccountsRepository(IDatabaseService databaseService) : IAcco
             """;
 
         command.Parameters.AddWithValue("$accountId", accountId);
+
+        command.ExecuteNonQuery();
     }
 
     public bool Exists(string accountId)
