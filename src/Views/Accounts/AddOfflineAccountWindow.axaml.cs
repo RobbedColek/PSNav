@@ -5,6 +5,8 @@ namespace PSNav.Views.Accounts;
 
 public partial class AddOfflineAccountWindow : Window
 {
+    private const int MaxProfileIdLength = 16;
+
     public AddOfflineAccountWindow()
     {
         InitializeComponent();
@@ -20,9 +22,22 @@ public partial class AddOfflineAccountWindow : Window
         string onlineId = OnlineIdTextBox.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(onlineId))
         {
+            ShowError("Profile ID cannot be empty.");
+            return;
+        }
+
+        if (onlineId.Length > MaxProfileIdLength)
+        {
+            ShowError($"Profile ID cannot be longer than {MaxProfileIdLength} characters.");
             return;
         }
 
         Close(onlineId);
+    }
+
+    private void ShowError(string message)
+    {
+        ErrorTextBlock.Text = message;
+        ErrorTextBlock.IsVisible = true;
     }
 }

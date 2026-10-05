@@ -8,14 +8,13 @@
         x:Class="PSNav.Views.Accounts.AddOfflineAccountWindow"
         Title="Add Offline Account"
         Width="640"
-        Height="220"
         MinWidth="640"
-        MinHeight="220"
+        SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         SystemDecorations="BorderOnly"
         CanResize="False">
 
-    <Grid RowDefinitions="Auto,*,Auto"
+    <Grid RowDefinitions="Auto,Auto,Auto"
           Margin="20"
           RowSpacing="10">
         <StackPanel Grid.Row="0"
@@ -39,6 +38,11 @@
                            Foreground="#FF9A9A9A" />
                 <TextBox x:Name="OnlineIdTextBox" />
             </StackPanel>
+
+            <TextBlock x:Name="ErrorTextBlock"
+                       Foreground="#FFFF6B6B"
+                       TextWrapping="Wrap"
+                       IsVisible="False" />
         </StackPanel>
 
         <StackPanel Grid.Row="2"
