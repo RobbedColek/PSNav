@@ -129,11 +129,10 @@ public partial class AccountsView : UserControl
 
     private async void RefreshAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is not MainWindow owner)
+        if (sender is not Button { DataContext: Account account })
             return;
 
-        Account? selectedAccount = _viewModel.SelectedAccount;
-        if (selectedAccount is null)
+        if (TopLevel.GetTopLevel(this) is not MainWindow owner)
             return;
 
         owner.IsBlurred = true;
@@ -142,17 +141,17 @@ public partial class AccountsView : UserControl
         {
             AddAccountWindow dialog = new();
 
-            Account? account = await dialog.ShowDialog<Account?>(owner);
+            Account? newAccount = await dialog.ShowDialog<Account?>(owner);
 
-            if (account is null)
+            if (newAccount is null)
                 return;
 
-            selectedAccount.NpssoToken = account.NpssoToken;
-            selectedAccount.NpssoTokenExpiration = account.NpssoTokenExpiration;
-            selectedAccount.AccessToken = null;
-            selectedAccount.UpdatedAt = DateTimeOffset.Now;
+            account.NpssoToken = newAccount.NpssoToken;
+            account.NpssoTokenExpiration = newAccount.NpssoTokenExpiration;
+            account.AccessToken = null;
+            account.UpdatedAt = DateTimeOffset.Now;
 
-            _viewModel.UpdateAccount(selectedAccount);
+            _viewModel.UpdateAccount(account);
         }
         finally
         {
@@ -163,7 +162,9 @@ public partial class AccountsView : UserControl
 
     private async void DeleteAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (sender is not Button { DataContext: Account account }) return;
+        if (sender is not Button { DataContext: Account account })
+            return;
+
         if (TopLevel.GetTopLevel(this) is not MainWindow owner)
             return;
 
@@ -176,9 +177,7 @@ public partial class AccountsView : UserControl
             bool result = await dialog.ShowDialog<bool>(owner);
 
             if (result)
-            {
                 _viewModel.DeleteAccount(account);
-            }
         }
         finally
         {
