@@ -22,7 +22,6 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
                 e.TitleID,
                 pe.ProductID,
                 e.Name,
-                e.Image,
                 COALESCE(UPPER(e.Platform), 'N/A') as Platform,
                 pe.Membership,
                 e.ReferencePackageUrl,
@@ -51,7 +50,6 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
                 e.TitleID,
                 ae.ProductID,
                 e.Name,
-                e.Image,
                 COALESCE(UPPER(e.Platform), 'N/A') as Platform,
                 ae.Membership,
                 e.ReferencePackageUrl,
@@ -76,14 +74,40 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
             ORDER BY Name COLLATE NOCASE;
             """;
 
+        using (SqliteDataReader reader = command.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                entitlements.Add(ReadEntitlement(reader));
+            }
+        }
+
+        // Images are loaded separately so the sort above does not have to carry the image blobs
+        Dictionary<string, byte[]> images = GetAllImages(connection);
+
+        foreach (Entitlement entitlement in entitlements)
+        {
+            entitlement.Image = images.GetValueOrDefault(entitlement.EntitlementId);
+        }
+
+        return entitlements;
+    }
+
+    private static Dictionary<string, byte[]> GetAllImages(SqliteConnection connection)
+    {
+        Dictionary<string, byte[]> images = [];
+
+        using SqliteCommand command = connection.CreateCommand();
+        command.CommandText = "SELECT EntitlementID, Image FROM Entitlements WHERE Image IS NOT NULL;";
+
         using SqliteDataReader reader = command.ExecuteReader();
 
         while (reader.Read())
         {
-            entitlements.Add(ReadEntitlement(reader));
+            images[reader.GetString(0)] = (byte[])reader["Image"];
         }
 
-        return entitlements;
+        return images;
     }
 
     public void Upsert(string accountId, Entitlement entitlement)
@@ -408,25 +432,24 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
             TitleId = reader.IsDBNull(1) ? null : reader.GetString(1),
             ProductId = reader.IsDBNull(2) ? null : reader.GetString(2),
             Name = reader.IsDBNull(3) ? null : reader.GetString(3),
-            Image = reader.IsDBNull(4) ? null : (byte[])reader["Image"],
-            Platform = reader.IsDBNull(5) ? null : reader.GetString(5),
-            Membership = reader.IsDBNull(6) ? null : reader.GetString(6),
-            ReferencePackageUrl = reader.IsDBNull(7) ? null : reader.GetString(7),
-            IsActive = reader.IsDBNull(8) ? null : reader.GetBoolean(8),
-            PackageFileSize = reader.IsDBNull(9) ? null : reader.GetInt64(9),
-            EntitlementType = reader.IsDBNull(10) ? null : reader.GetInt32(10),
-            FeatureType = reader.IsDBNull(11) ? null : reader.GetInt32(11),
-            PackageType = reader.IsDBNull(12) ? null : reader.GetString(12),
-            Type = reader.IsDBNull(13) ? null : reader.GetString(13),
-            OwnerOnlineId = reader.IsDBNull(14) ? null : reader.GetString(14),
+            Platform = reader.IsDBNull(4) ? null : reader.GetString(4),
+            Membership = reader.IsDBNull(5) ? null : reader.GetString(5),
+            ReferencePackageUrl = reader.IsDBNull(6) ? null : reader.GetString(6),
+            IsActive = reader.IsDBNull(7) ? null : reader.GetBoolean(7),
+            PackageFileSize = reader.IsDBNull(8) ? null : reader.GetInt64(8),
+            EntitlementType = reader.IsDBNull(9) ? null : reader.GetInt32(9),
+            FeatureType = reader.IsDBNull(10) ? null : reader.GetInt32(10),
+            PackageType = reader.IsDBNull(11) ? null : reader.GetString(11),
+            Type = reader.IsDBNull(12) ? null : reader.GetString(12),
+            OwnerOnlineId = reader.IsDBNull(13) ? null : reader.GetString(13),
             TypeDisplayString = GetTypeDisplayString(
-                reader.IsDBNull(13) ? null : reader.GetString(13)),
+                reader.IsDBNull(12) ? null : reader.GetString(12)),
             RetentionPolicyDisplayString = GetRetentionPolicyDisplayString(
-                reader.IsDBNull(15) ? null : reader.GetInt32(15)),
+                reader.IsDBNull(14) ? null : reader.GetInt32(14)),
             FeatureTypeDisplayString = GetFeatureTypeDisplayString(
-                reader.IsDBNull(11) ? null : reader.GetInt32(11)),
+                reader.IsDBNull(10) ? null : reader.GetInt32(10)),
             MembershipDisplayString = GetMembershipDisplayString(
-                reader.IsDBNull(6) ? null : reader.GetString(6))
+                reader.IsDBNull(5) ? null : reader.GetString(5))
         };
     }
 
