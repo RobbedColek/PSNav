@@ -11,6 +11,7 @@ using PSNav.Infrastructure.Export;
 using PSNav.Models.Entitlements;
 using PSNav.Models.Messages;
 using PSNav.Repositories.Entitlements;
+using PSNav.Repositories.Settings;
 
 namespace PSNav.ViewModels.Entitlements;
 
@@ -33,11 +34,16 @@ public partial class FilterOption : ViewModelBase
 
 public sealed partial class EntitlementsViewModel : ViewModelBase
 {
-    private readonly IEntitlementsRepository _entitlementsRepository;
+    private const string HiddenColumnsSettingKey = "Entitlements:HiddenColumns";
 
-    public EntitlementsViewModel(IEntitlementsRepository entitlementsRepository)
+    private readonly IEntitlementsRepository _entitlementsRepository;
+    private readonly ISettingsRepository _settingsRepository;
+
+    public EntitlementsViewModel(IEntitlementsRepository entitlementsRepository,
+        ISettingsRepository settingsRepository)
     {
         _entitlementsRepository = entitlementsRepository;
+        _settingsRepository = settingsRepository;
         InitializeColumns();
         WeakReferenceMessenger.Default.Register<ConsolesChangedMessage>(this, (_, _) => RefreshAllEntitlements());
         WeakReferenceMessenger.Default.Register<AccountsSynchronizedMessage>(this, (_, _) => RefreshAllEntitlements());
@@ -52,24 +58,33 @@ public sealed partial class EntitlementsViewModel : ViewModelBase
     {
         if (_columnsInitialized) return;
         _columnsInitialized = true;
-        AvailableColumns.Add(new FilterOption { DisplayName = "Icon", IsSelected = true });
-        AvailableColumns.Add(new FilterOption { DisplayName = "Name", IsSelected = true });
-        AvailableColumns.Add(new FilterOption { DisplayName = "Title ID", IsSelected = true });
-        AvailableColumns.Add(new FilterOption
-            { DisplayName = "Owner", IsSelected = true, OnHiddenAction = () => ClearFilter(AvailableOwners) });
-        AvailableColumns.Add(new FilterOption
-            { DisplayName = "Platform", IsSelected = true, OnHiddenAction = () => ClearFilter(AvailablePlatforms) });
-        AvailableColumns.Add(new FilterOption
-            { DisplayName = "Type", IsSelected = true, OnHiddenAction = () => ClearFilter(AvailableTypes) });
-        AvailableColumns.Add(new FilterOption
-            { DisplayName = "Retention", IsSelected = true, OnHiddenAction = () => ClearFilter(AvailableRetentions) });
-        AvailableColumns.Add(new FilterOption
-            { DisplayName = "Feature", IsSelected = true, OnHiddenAction = () => ClearFilter(AvailableFeatures) });
-        AvailableColumns.Add(new FilterOption
+        var hidden = _settingsRepository.Get<List<string>>(HiddenColumnsSettingKey)?.ToHashSet() ?? [];
+
+        void AddColumn(string name, ObservableCollection<FilterOption>? filterToClear = null)
         {
-            DisplayName = "Membership", IsSelected = true, OnHiddenAction = () => ClearFilter(AvailableMemberships)
-        });
+            AvailableColumns.Add(new FilterOption
+            {
+                DisplayName = name,
+                IsSelected = !hidden.Contains(name),
+                OnSelectionChanged = SaveColumnSelection,
+                OnHiddenAction = filterToClear is null ? null : () => ClearFilter(filterToClear)
+            });
+        }
+
+        AddColumn("Icon");
+        AddColumn("Name");
+        AddColumn("Title ID");
+        AddColumn("Owner", AvailableOwners);
+        AddColumn("Platform", AvailablePlatforms);
+        AddColumn("Type", AvailableTypes);
+        AddColumn("Retention", AvailableRetentions);
+        AddColumn("Feature", AvailableFeatures);
+        AddColumn("Membership", AvailableMemberships);
     }
+
+    private void SaveColumnSelection() =>
+        _settingsRepository.Set(HiddenColumnsSettingKey,
+            AvailableColumns.Where(c => !c.IsSelected).Select(c => c.DisplayName).ToList());
 
     private static readonly Dictionary<string, Func<Entitlement, string?>> ExportValueSelectors = new()
     {
