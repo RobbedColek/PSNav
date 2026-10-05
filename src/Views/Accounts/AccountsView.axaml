@@ -149,19 +149,19 @@
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Profile ID"
                                         Binding="{Binding OnlineId}"
-                                        Width="*" />
+                                        Width="Auto" />
                     <DataGridTextColumn Header="Entitlements"
                                         Binding="{Binding EntitlementCount}"
-                                        Width="Auto" />
+                                        Width="*" />
                     <DataGridTextColumn Header="Account ID"
                                         Binding="{Binding AccountId}"
-                                        Width="Auto" />
+                                        Width="*" />
                     <DataGridTextColumn Header="Token Expiration"
                                         Binding="{Binding NpssoTokenExpiration, Converter={StaticResource DateTimeOffsetToLocalConverter}, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}', TargetNullValue='- - -'}"
-                                        Width="Auto" />
+                                        Width="*" />
                     <DataGridTextColumn Header="Last Synchronization"
                                         Binding="{Binding LastSynchronization, Converter={StaticResource DateTimeOffsetToLocalConverter}, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}', TargetNullValue='- - -'}"
-                                        Width="Auto" />
+                                        Width="*" />
                     <DataGridTemplateColumn Header=""
                                             Width="Auto"
                                             CanUserSort="False">
