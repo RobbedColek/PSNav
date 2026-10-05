@@ -50,7 +50,7 @@
               RowSpacing="16"
               Classes.Blurred="{Binding IsImageOverlayVisible}">
             <Grid Grid.Row="0"
-                  ColumnDefinitions="*,Auto,Auto">
+                  ColumnDefinitions="*,Auto,Auto,Auto">
                 <StackPanel Grid.Column="0"
                             Spacing="4">
                     <TextBlock Text="Entitlements"
@@ -59,29 +59,7 @@
                                Foreground="White" />
                 </StackPanel>
 
-                <Button Grid.Column="1"
-                        MinWidth="36"
-                        Height="36"
-                        Padding="0"
-                        Margin="0,0,12,0"
-                        VerticalAlignment="Center"
-                        HorizontalContentAlignment="Center"
-                        VerticalContentAlignment="Center">
-                    <Button.Flyout>
-                        <Flyout>
-                            <ListBox ItemsSource="{Binding AvailableColumns}"
-                                     Classes="FilterListBox">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding IsSelected}" />
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Flyout>
-                    </Button.Flyout>
-                    <phosphoricons:PhosphorIcons Kind="Columns" />
-                </Button>
-                <TextBox Grid.Column="2"
+                <TextBox Grid.Column="1"
                          Width="448"
                          Height="36"
                          VerticalAlignment="Center"
@@ -112,6 +90,40 @@
                         </Button>
                     </TextBox.InnerRightContent>
                 </TextBox>
+                <Button Grid.Column="2"
+                        MinWidth="36"
+                        Height="36"
+                        Padding="0"
+                        Margin="12,0,0,0"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center">
+                    <Button.Flyout>
+                        <Flyout>
+                            <ListBox ItemsSource="{Binding AvailableColumns}"
+                                     Classes="FilterListBox">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding DisplayName}" IsChecked="{Binding IsSelected}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Flyout>
+                    </Button.Flyout>
+                    <phosphoricons:PhosphorIcons Kind="Columns" />
+                </Button>
+                <Button Grid.Column="3"
+                        MinWidth="36"
+                        Height="36"
+                        Padding="0"
+                        Margin="12,0,0,0"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        ToolTip.Tip="Export to CSV"
+                        Click="ExportToCsv_Click">
+                    <phosphoricons:PhosphorIcons Kind="FileCsv" />
+                </Button>
             </Grid>
 
             <Border Grid.Row="1"
@@ -123,6 +135,7 @@
                     ClipToBounds="True">
                 <Grid ColumnDefinitions="*,Auto">
                     <DataGrid Grid.Column="0"
+                              Name="EntitlementsGrid"
                               ItemsSource="{Binding FilteredEntitlements}"
                               SelectedItem="{Binding SelectedEntitlement}"
                               AutoGenerateColumns="False"
@@ -500,7 +513,7 @@
                        RenderOptions.BitmapInterpolationMode="HighQuality" />
             </Border>
         </Grid>
-        <Border Name="CopiedMessage"
+        <Border Name="ToastMessage"
                 Background="#CC000000"
                 CornerRadius="20"
                 Padding="16,8"
@@ -516,7 +529,7 @@
             </Border.Transitions>
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <codicons:PackIconCodicons Kind="Check" Width="16" Height="16" Foreground="#FF4CAF50" />
-                <TextBlock Text="Copied to clipboard"
+                <TextBlock Name="ToastText"
                            VerticalAlignment="Center"
                            FontSize="14"
                            FontWeight="Medium" />

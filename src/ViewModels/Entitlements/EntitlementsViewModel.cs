@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using PSNav.Infrastructure.Export;
 using PSNav.Models.Entitlements;
 using PSNav.Models.Messages;
 using PSNav.Repositories.Entitlements;
@@ -66,6 +69,30 @@ public sealed partial class EntitlementsViewModel : ViewModelBase
         {
             DisplayName = "Membership", IsSelected = true, OnHiddenAction = () => ClearFilter(AvailableMemberships)
         });
+    }
+
+    private static readonly Dictionary<string, Func<Entitlement, string?>> ExportValueSelectors = new()
+    {
+        ["Name"] = e => e.Name,
+        ["Title ID"] = e => e.TitleId,
+        ["Owner"] = e => e.OwnerOnlineId,
+        ["Platform"] = e => e.Platform,
+        ["Type"] = e => e.TypeDisplayString,
+        ["Retention"] = e => e.RetentionPolicyDisplayString,
+        ["Feature"] = e => e.FeatureTypeDisplayString,
+        ["Membership"] = e => e.MembershipDisplayString
+    };
+
+    public async Task ExportToCsvAsync(Stream stream, IEnumerable<Entitlement> rows)
+    {
+        var columns = AvailableColumns
+            .Where(c => c.IsSelected && ExportValueSelectors.ContainsKey(c.DisplayName))
+            .Select(c => (Header: c.DisplayName, Selector: ExportValueSelectors[c.DisplayName]))
+            .ToList();
+
+        await CsvWriter.WriteAsync(stream,
+            columns.Select(c => c.Header).ToList(),
+            rows.Select(e => (IReadOnlyList<string?>)columns.Select(c => c.Selector(e)).ToList()));
     }
 
     private void ClearFilter(ObservableCollection<FilterOption> options)

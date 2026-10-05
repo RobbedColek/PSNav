@@ -1,14 +1,19 @@
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Models.Entitlements;
 using PSNav.ViewModels.Entitlements;
+using PSNav.Views.Common;
+using PSNav.Views.Shell;
 
 namespace PSNav.Views.Entitlements;
 
@@ -83,17 +88,99 @@ public partial class EntitlementsView : UserControl
         }
     }
 
-    private async void ShowCopiedMessage()
+    private void ShowCopiedMessage()
     {
-        CopiedMessage.Opacity = 1;
+        ShowToast("Copied to clipboard");
+    }
+
+    private async void ShowToast(string message)
+    {
+        ToastText.Text = message;
+        ToastMessage.Opacity = 1;
         await Task.Delay(2000);
-        CopiedMessage.Opacity = 0;
+        ToastMessage.Opacity = 0;
+    }
+
+    private async void ExportToCsv_Click(object? sender, RoutedEventArgs e)
+    {
+        var rows = EntitlementsGrid.CollectionView?.Cast<Entitlement>().ToList() ?? [];
+
+        MainWindow? mainWindow = VisualRoot as MainWindow;
+        mainWindow?.IsBlurred = true;
+
+        IStorageFile? file;
+        try
+        {
+            FilePickerSaveOptions options = new()
+            {
+                Title = "Export entitlements",
+                SuggestedFileName = $"PSNav-{DateTime.Now:yyyyMMdd-HHmmss}.csv",
+                DefaultExtension = "csv",
+                ShowOverwritePrompt = true,
+                FileTypeChoices =
+                [
+                    new FilePickerFileType("CSV file")
+                    {
+                        Patterns = ["*.csv"]
+                    }
+                ]
+            };
+
+            file = await (VisualRoot as Window)!.StorageProvider.SaveFilePickerAsync(options);
+        }
+        finally
+        {
+            mainWindow?.IsBlurred = false;
+        }
+
+        if (file == null)
+            return;
+
+        try
+        {
+            await using Stream stream = await file.OpenWriteAsync();
+
+            if (stream.CanSeek)
+                stream.SetLength(0);
+
+            await _viewModel.ExportToCsvAsync(stream, rows);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync("Failed to export entitlements", ex);
+            return;
+        }
+        finally
+        {
+            file.Dispose();
+        }
+
+        ShowToast(rows.Count == 1 ? "Exported 1 entitlement" : $"Exported {rows.Count} entitlements");
+    }
+
+    private async Task ShowErrorAsync(string title, Exception exception)
+    {
+        MainWindow? mainWindow = VisualRoot as MainWindow;
+        mainWindow?.IsBlurred = true;
+
+        try
+        {
+            ErrorDialog dialog = new(title, exception.Message);
+            await dialog.ShowDialog(mainWindow ?? (Window)VisualRoot!);
+        }
+        finally
+        {
+            mainWindow?.IsBlurred = false;
+        }
     }
 
     private void ShowAllForSelectedEntitlement_Click(object? sender, RoutedEventArgs e)
     {
         Entitlement? selectedEntitlement = _viewModel.SelectedEntitlement;
-        if (selectedEntitlement == null) return;
+
+        if (selectedEntitlement == null)
+            return;
+
         _viewModel.SearchText = selectedEntitlement.TitleId!;
         _viewModel.SelectedEntitlement = selectedEntitlement;
     }
@@ -102,7 +189,9 @@ public partial class EntitlementsView : UserControl
     {
         if (sender is not TextBlock textBlock || string.IsNullOrEmpty(textBlock.Text) ||
             textBlock.Text == "Missing") return;
+
         PointerPointProperties pointerProperties = e.GetCurrentPoint(textBlock).Properties;
+
         if (pointerProperties.IsLeftButtonPressed)
         {
             Process.Start(new ProcessStartInfo
@@ -114,7 +203,10 @@ public partial class EntitlementsView : UserControl
         else if (pointerProperties.IsRightButtonPressed)
         {
             TopLevel? topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel?.Clipboard is null) return;
+
+            if (topLevel?.Clipboard is null)
+                return;
+
             await topLevel.Clipboard.SetTextAsync(textBlock.Text);
             ShowCopiedMessage();
         }
