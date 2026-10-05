@@ -34,14 +34,15 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
                 e.PackageFileSize,
                 e.EntitlementType,
                 pe.FeatureType,
-                e.PackageType,
-                COALESCE(e.Type, 'N/A') as Type,
+                COALESCE(eo.PackageType, e.PackageType) as PackageType,
+                COALESCE(eo.Type, e.Type, 'N/A') as Type,
                 a.OnlineID,
                 pe.RetentionPolicy
             FROM Entitlements e
             INNER JOIN ProfileEntitlements pe ON e.EntitlementID = pe.EntitlementID
             INNER JOIN ConsoleProfiles cp ON pe.ProfileID = cp.ProfileID
             INNER JOIN Accounts a ON cp.AccountID = a.AccountID
+            LEFT JOIN EntitlementOverrides eo ON e.TitleID = eo.TitleID AND e.Type = eo.MatchType
 
             UNION ALL
 
@@ -58,13 +59,14 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
                 e.PackageFileSize,
                 e.EntitlementType,
                 null,
-                e.PackageType,
-                COALESCE(e.Type, 'Game') as Type,
+                COALESCE(eo.PackageType, e.PackageType),
+                COALESCE(eo.Type, e.Type, 'Game') as Type,
                 a.OnlineID,
                 null
             FROM Entitlements e
             INNER JOIN AccountEntitlements ae ON e.EntitlementID = ae.EntitlementID
             INNER JOIN Accounts a ON ae.AccountID = a.AccountID
+            LEFT JOIN EntitlementOverrides eo ON e.TitleID = eo.TitleID AND e.Type = eo.MatchType
             WHERE NOT EXISTS (
                 SELECT 1
                 FROM ProfileEntitlements pe

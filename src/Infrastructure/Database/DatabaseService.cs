@@ -225,7 +225,16 @@ public sealed class DatabaseService : IDatabaseService, IDisposable
                 UpdatedAt INTEGER NOT NULL DEFAULT (unixepoch())
             );
 
-            CREATE INDEX IF NOT EXISTS IX_Entitlements_Name 
+            CREATE TABLE IF NOT EXISTS EntitlementOverrides
+            (
+                TitleID TEXT NOT NULL,
+                MatchType TEXT NOT NULL,
+                PackageType TEXT NULL,
+                Type TEXT NULL,
+                PRIMARY KEY (TitleID, MatchType)
+            );
+
+            CREATE INDEX IF NOT EXISTS IX_Entitlements_Name
                 ON Entitlements (Name COLLATE NOCASE);
 
             CREATE INDEX IF NOT EXISTS IX_Entitlements_TitleID 
@@ -265,5 +274,7 @@ public sealed class DatabaseService : IDatabaseService, IDisposable
                 ON ConsoleProfiles (ProfileID, AccountID);
             """;
         command.ExecuteNonQuery();
+
+        EntitlementOverrides.Synchronize(connection);
     }
 }
