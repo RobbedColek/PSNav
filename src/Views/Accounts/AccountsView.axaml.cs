@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
@@ -88,6 +90,41 @@ public partial class AccountsView : UserControl
         using MemoryStream buffer = new();
         stream.CopyTo(buffer);
         return buffer.ToArray();
+    }
+
+    private async void Synchronize_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        List<string> expiredAccounts = _viewModel.Accounts
+            .Where(account => account is { HasNpssoToken: true, IsTokenExpired: true })
+            .Select(account => account.OnlineId ?? account.AccountId)
+            .ToList();
+
+        if (expiredAccounts.Count > 0)
+        {
+            if (TopLevel.GetTopLevel(this) is not MainWindow owner)
+                return;
+
+            owner.IsBlurred = true;
+
+            try
+            {
+                Common.ConfirmDialog dialog = new("Expired NPSSO tokens",
+                    "The following accounts have expired NPSSO tokens:\n" +
+                    string.Join("\n", expiredAccounts.Select(name => $"  • {name}")) + "\n\n" +
+                    "You can refresh a token using the button next to an account entry.\n" +
+                    "Do you want to continue? Only accounts with valid NPSSO tokens will be synchronized.");
+                bool result = await dialog.ShowDialog<bool>(owner);
+
+                if (!result)
+                    return;
+            }
+            finally
+            {
+                owner.IsBlurred = false;
+            }
+        }
+
+        await _viewModel.SynchronizeCommand.ExecuteAsync(null);
     }
 
     private async void RefreshAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

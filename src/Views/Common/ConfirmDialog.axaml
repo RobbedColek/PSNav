@@ -8,7 +8,7 @@
         x:Class="PSNav.Views.Common.ConfirmDialog"
         Title="Confirm"
         Width="480"
-        Height="180"
+        SizeToContent="Height"
         MinWidth="480"
         MinHeight="180"
         WindowStartupLocation="CenterOwner"

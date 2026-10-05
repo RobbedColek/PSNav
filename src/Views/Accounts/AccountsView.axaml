@@ -36,7 +36,8 @@
                     Padding="0"
                     Margin="0,0,12,0"
                     VerticalAlignment="Center"
-                    Command="{Binding SynchronizeCommand}"
+                    Click="Synchronize_Click"
+                    IsEnabled="{Binding !IsSynchronizing}"
                     ToolTip.Tip="Synchronize">
                 <iconPacks:PackIconCodicons Kind="Sync"
                                             HorizontalAlignment="Center"
