@@ -3,9 +3,11 @@ using ColekUI.Navigation;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Resources;
 using PSNav.ViewModels.Accounts;
+using PSNav.ViewModels.Backloggery;
 using PSNav.ViewModels.Consoles;
 using PSNav.ViewModels.Entitlements;
 using PSNav.ViewModels.Patches;
+using PSNav.ViewModels.Settings;
 
 namespace PSNav.ViewModels.Shell;
 
@@ -33,14 +35,19 @@ public class MainViewModel : ViewModelBase
             typeof(ConsolesViewModel)));
 
         Navigation.Items.Add(new NavigationItem(
+            "Backloggery",
+            AppIcons.Get("Codicon.CloudUpload"),
+            typeof(BackloggeryViewModel)));
+
+        Navigation.Items.Add(new NavigationItem(
             "Patches",
             AppIcons.Get("Phosphor.RocketLaunchLight"),
             typeof(PatchesViewModel)));
 
-//        Navigation.FooterItems.Add(new NavigationItem(
-//            "Settings",
-//            AppIcons.Get("Codicon.SettingsGear"),
-//            typeof(ViewModelBase)));
+        Navigation.FooterItems.Add(new NavigationItem(
+            "Settings",
+            AppIcons.Get("Codicon.SettingsGear"),
+            typeof(SettingsViewModel)));
 
         Navigation.SelectedItem = Navigation.Items[0];
     }

@@ -234,6 +234,15 @@ public sealed class DatabaseService : IDatabaseService, IDisposable
                 PRIMARY KEY (TitleID, MatchType)
             );
 
+            CREATE TABLE IF NOT EXISTS BackloggerySync
+            (
+                EntitlementID TEXT NOT NULL PRIMARY KEY,
+                Status TEXT NOT NULL,
+                BackloggeryGameID INTEGER NULL,
+                Platform TEXT NULL,
+                SyncedAt INTEGER NOT NULL DEFAULT (unixepoch())
+            );
+
             CREATE INDEX IF NOT EXISTS IX_Entitlements_Name
                 ON Entitlements (Name COLLATE NOCASE);
 

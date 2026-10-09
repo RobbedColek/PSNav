@@ -1,0 +1,389 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:PSNav.Models.Backloggery"
+             xmlns:converters="clr-namespace:PSNav.Converters"
+             xmlns:colek="https://github.com/RobbedColek/ColekUI"
+             xmlns:vm="clr-namespace:PSNav.ViewModels.Backloggery"
+             xmlns:views="clr-namespace:PSNav.Views.Backloggery"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
+             x:Class="PSNav.Views.Backloggery.BackloggeryView"
+             x:DataType="vm:BackloggeryViewModel">
+
+    <UserControl.Resources>
+        <converters:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter" />
+        <converters:IsActiveToBrushConverter x:Key="IsActiveToBrushConverter" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*"
+          RowSpacing="8">
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+            <StackPanel Grid.Column="0"
+                        Spacing="4">
+                <TextBlock Text="Synchronize with Backloggery"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+                <TextBlock Text="{Binding SessionText}"
+                           Foreground="#FF9A9A9A"
+                           FontSize="12"
+                           IsVisible="{Binding HasSession}" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Command="{Binding AnalyzeCommand}"
+                    ToolTip.Tip="Analyze">
+                <colek:Codicon Data="{StaticResource Codicon.Search}"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+            </Button>
+
+            <Button Grid.Column="2"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding HasPlan}"
+                    ToolTip.Tip="Select">
+                <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuItem Header="Check all" Command="{Binding SelectAllCommand}" />
+                        <MenuItem Header="Uncheck all" Command="{Binding UnselectAllCommand}" />
+                        <Separator />
+                        <MenuItem Header="Check only unmatched" Command="{Binding SelectUnmatchedCommand}" />
+                        <MenuItem Header="Uncheck only unmatched" Command="{Binding UnselectUnmatchedCommand}" />
+                    </MenuFlyout>
+                </Button.Flyout>
+                <colek:Codicon Data="{StaticResource Codicon.Checklist}"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+            </Button>
+
+            <Button Grid.Column="3"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Command="{Binding ApplyCommand}"
+                    IsVisible="{Binding !IsApplying}"
+                    ToolTip.Tip="Apply">
+                <colek:Codicon Data="{StaticResource Codicon.CloudUpload}"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+            </Button>
+
+            <Button Grid.Column="4"
+                    MinWidth="36"
+                    Height="36"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Command="{Binding CancelCommand}"
+                    IsVisible="{Binding IsApplying}"
+                    ToolTip.Tip="Cancel">
+                <colek:Codicon Data="{StaticResource Codicon.Close}"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+            </Button>
+        </Grid>
+
+        <StackPanel Grid.Row="1"
+                    IsVisible="{Binding IsBusy}"
+                    Spacing="8"
+                    Margin="0,-8,0,0">
+            <TextBlock Text="{Binding Status}"
+                       Foreground="#FF9A9A9A"
+                       FontSize="12" />
+            <ProgressBar Value="{Binding Progress}"
+                         IsIndeterminate="{Binding !IsApplying}"
+                         Minimum="0"
+                         Maximum="100"
+                         Height="4"
+                         Background="#FF242424"
+                         Foreground="#FF0078D4" />
+        </StackPanel>
+
+        <Border Grid.Row="2"
+                Grid.RowSpan="3"
+                IsVisible="{Binding ShowLogin}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="480"
+                Background="#FF101010"
+                BorderBrush="#FF242424"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="16">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Log in to Backloggery"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+                <TextBlock Text="Your password is used only to log in and is not saved. PSNav stores the session token."
+                           Foreground="#FF9A9A9A"
+                           FontSize="12"
+                           TextWrapping="Wrap" />
+
+                <TextBox Text="{Binding Username}"
+                         IsReadOnly="{Binding HasSession}"
+                         PlaceholderText="Username" />
+                <TextBox Text="{Binding Password}"
+                         PasswordChar="•"
+                         PlaceholderText="Password" />
+                <Button Content="Log in"
+                        Command="{Binding LoginCommand}"
+                        IsDefault="True" />
+
+                <TextBlock Text="Or paste the log_token cookie from your browser:"
+                           Foreground="#FF9A9A9A"
+                           FontSize="12" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding LogToken}"
+                             PlaceholderText="log_token" />
+                    <Button Grid.Column="1"
+                            Content="Use token"
+                            Command="{Binding LoginWithTokenCommand}" />
+                </Grid>
+
+                <TextBlock Text="{Binding LoginError}"
+                           Foreground="#FFFF6B6B"
+                           TextWrapping="Wrap"
+                           IsVisible="{Binding LoginError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="3" IsVisible="{Binding !ShowLogin}">
+            <TextBlock Text="{Binding SummaryText}"
+                       IsVisible="{Binding HasPlan}"
+                       VerticalAlignment="Center"
+                       Foreground="#FF9A9A9A"
+                       FontSize="12" />
+        </Grid>
+
+        <Border Grid.Row="4"
+                IsVisible="{Binding !ShowLogin}"
+                Background="#FF101010"
+                BorderBrush="#FF242424"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="0"
+                ClipToBounds="True">
+            <Grid ColumnDefinitions="*,Auto">
+                <DataGrid Grid.Column="0"
+                          x:Name="ItemsGrid"
+                          ItemsSource="{Binding Items}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Extended"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          CanUserReorderColumns="False"
+                          CanUserResizeColumns="False"
+                          CanUserSortColumns="True"
+                          Background="Transparent"
+                          BorderThickness="0">
+                    <DataGrid.ContextMenu>
+                        <ContextMenu Opening="ItemsContextMenu_Opening">
+                            <MenuItem x:Name="IgnoreMenuItem"
+                                      Header="Ignore"
+                                      Click="Ignore_Click" />
+                            <MenuItem x:Name="UnignoreMenuItem"
+                                      Header="Remove from ignored"
+                                      Click="Unignore_Click" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.Styles>
+                        <Style Selector="DataGridColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
+                        <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+                            <Setter Property="IsVisible" Value="False" />
+                        </Style>
+                        <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+                            <Setter Property="IsVisible" Value="False" />
+                        </Style>
+                        <Style Selector="TextBlock.error">
+                            <Setter Property="Foreground" Value="#FFFF6B6B" />
+                        </Style>
+                        <Style Selector="DataGridRow" x:DataType="models:BackloggerySyncItem">
+                            <Setter Property="Foreground"
+                                    Value="{Binding IsSelected, Converter={StaticResource IsActiveToBrushConverter}}" />
+                        </Style>
+                    </DataGrid.Styles>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header=""
+                                                Width="48"
+                                                SortMemberPath="IsSelected">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:BackloggerySyncItem">
+                                    <CheckBox IsChecked="{Binding IsSelected}"
+                                              IsEnabled="{Binding IsSelectable}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="12,0,0,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header=""
+                                                Width="56"
+                                                CanUserSort="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:BackloggerySyncItem">
+                                    <Border Width="32"
+                                            Height="32"
+                                            CornerRadius="8"
+                                            ClipToBounds="True"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Background="#FF242424">
+                                        <Image
+                                            Source="{Binding Image, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=36}"
+                                            Width="32"
+                                            Height="32"
+                                            Stretch="Uniform"
+                                            RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Name"
+                                                Width="*"
+                                                SortMemberPath="Name">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:BackloggerySyncItem">
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="8"
+                                                Margin="12,0"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Text="{Binding Platform}"
+                                                   IsVisible="{Binding ShowPlatform}"
+                                                   Foreground="#FF9A9A9A"
+                                                   FontSize="10"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Title on Backloggery"
+                                                Width="*"
+                                                SortMemberPath="Title">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:BackloggerySyncItem">
+                                    <StackPanel VerticalAlignment="Center" Margin="12,6" Spacing="3">
+                                        <TextBlock Text="{Binding TitleDisplay}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip.Tip="{Binding TitleDisplay}" />
+                                        <TextBlock Text="{Binding EditSummary}"
+                                                   IsVisible="{Binding IsSelectable}"
+                                                   Foreground="#FF9A9A9A" FontSize="10"
+                                                   TextWrapping="Wrap"
+                                                   ToolTip.Tip="{Binding EditSummary}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Status"
+                                                Width="*"
+                                                SortMemberPath="StatusDisplay">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:BackloggerySyncItem">
+                                    <TextBlock Text="{Binding StatusDisplay}"
+                                               Classes.error="{Binding HasError}"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip.Tip="{Binding StatusDisplay}"
+                                               VerticalAlignment="Center"
+                                               Margin="12,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="" Width="56" CanUserSort="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:BackloggerySyncItem">
+                                    <Button Width="28" Height="28" Padding="0"
+                                            Margin="{Binding $parent[views:BackloggeryView].EditButtonMargin}"
+                                            Background="Transparent" BorderThickness="0"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            IsVisible="{Binding IsSelectable}"
+                                            IsEnabled="{Binding !$parent[UserControl].((vm:BackloggeryViewModel)DataContext).IsBusy}"
+                                            ToolTip.Tip="Edit" Click="Edit_Click">
+                                        <colek:Codicon Data="{StaticResource Codicon.Edit}" Width="16" Height="16" Stretch="Uniform" />
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Border Grid.Column="1" x:Name="EditorPanel"
+                        Width="300" BorderBrush="#FF242424" BorderThickness="1,0,0,0"
+                        Padding="12"
+                        IsVisible="{Binding Editor, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <ScrollViewer>
+                        <Grid RowDefinitions="Auto,Auto">
+                            <Button Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Width="26" Height="26" Padding="0" Background="Transparent" BorderThickness="0"
+                                    ToolTip.Tip="Close editor" Command="{Binding CloseEditorCommand}" ZIndex="1">
+                                <colek:Codicon Data="{StaticResource Codicon.Close}" Width="16" Height="16" Stretch="Uniform" />
+                            </Button>
+                            <StackPanel Grid.Row="0" Spacing="8" DataContext="{Binding Editor}"
+                                        x:DataType="vm:BackloggeryGameEditorViewModel"
+                                        IsEnabled="{Binding !$parent[UserControl].((vm:BackloggeryViewModel)DataContext).IsBusy}">
+                                <Border Width="128" Height="128" CornerRadius="8" ClipToBounds="True"
+                                        Background="#FF242424" HorizontalAlignment="Center">
+                                    <Image Source="{Binding Item.Image, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=128}"
+                                           Stretch="Uniform" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                </Border>
+                                <TextBlock Text="{Binding Item.Name}" FontSize="18" FontWeight="Bold"
+                                           TextWrapping="Wrap" TextAlignment="Center" Foreground="White" />
+                                <TextBlock Text="{Binding Item.Platform}" FontSize="12" Foreground="#FF9A9A9A"
+                                           TextAlignment="Center" />
+                                <Separator Margin="0,4" />
+                                <TextBlock Text="Title on Backloggery" Foreground="White" />
+                                <TextBox x:Name="EditorTitle" Text="{Binding Title, Mode=TwoWay}" />
+                                <TextBlock Text="Priority" Foreground="White" Margin="0,4,0,0" />
+                                <ComboBox x:Name="EditorPriority" ItemsSource="{Binding Priorities}"
+                                          SelectedItem="{Binding SelectedPriority, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BackloggeryPriorityChoice">
+                                            <TextBlock Text="{Binding Label}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBlock Text="Status" Foreground="White" Margin="0,4,0,0" />
+                                <ComboBox x:Name="EditorStatus" ItemsSource="{Binding Statuses}"
+                                          SelectedItem="{Binding SelectedStatus, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BackloggeryStatusChoice">
+                                            <TextBlock Text="{Binding Label}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <CheckBox x:Name="EditorStealthSave" Content="Stealth Save"
+                                          IsChecked="{Binding UseStealthSave, Mode=TwoWay}" Margin="0,4,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
+                                        Spacing="8" Margin="0,14,0,0">
+                                <Button Content="Cancel" Command="{Binding CloseEditorCommand}" />
+                                <Button Content="Done" Command="{Binding SaveEditCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

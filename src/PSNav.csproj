@@ -73,19 +73,29 @@
             <DependentUpon>EntitlementsView.axaml</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
+        <Compile Update="Views\Backloggery\BackloggeryView.axaml.cs">
+            <DependentUpon>BackloggeryView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
         <Compile Update="Views\Patches\PatchesView.axaml.cs">
             <DependentUpon>PatchesView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\SettingsView.axaml.cs">
+            <DependentUpon>SettingsView.axaml</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
     </ItemGroup>
 
     <ItemGroup>
         <AdditionalFiles Include="Views\Accounts\AccountsView.axaml"/>
+        <AdditionalFiles Include="Views\Backloggery\BackloggeryView.axaml"/>
         <AdditionalFiles Include="Views\Accounts\AddAccountWindow.axaml"/>
         <AdditionalFiles Include="Views\Accounts\AddOfflineAccountWindow.axaml"/>
         <AdditionalFiles Include="Views\Consoles\ConsolesView.axaml"/>
         <AdditionalFiles Include="Views\Consoles\RegisterConsoleWindow.axaml"/>
         <AdditionalFiles Include="Views\Entitlements\EntitlementsView.axaml"/>
         <AdditionalFiles Include="Views\Shell\MainWindow.axaml"/>
+        <AdditionalFiles Include="Views\Settings\SettingsView.axaml"/>
     </ItemGroup>
 </Project>

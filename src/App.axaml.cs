@@ -5,19 +5,24 @@ using Avalonia.Markup.Xaml;
 using ColekUI.Dialogs;
 using ColekUI.Windowing;
 using Microsoft.Extensions.DependencyInjection;
+using PSNav.Infrastructure.Backloggery;
 using PSNav.Infrastructure.Database;
 using PSNav.Infrastructure.PlayStationApi;
 using PSNav.Repositories.Accounts;
+using PSNav.Repositories.Backloggery;
 using PSNav.Repositories.Consoles;
 using PSNav.Repositories.Entitlements;
 using PSNav.Repositories.Patches;
 using PSNav.Repositories.Settings;
 using PSNav.Services.Accounts;
+using PSNav.Services.Backloggery;
 using PSNav.Services.Patches;
 using PSNav.ViewModels.Accounts;
+using PSNav.ViewModels.Backloggery;
 using PSNav.ViewModels.Consoles;
 using PSNav.ViewModels.Entitlements;
 using PSNav.ViewModels.Patches;
+using PSNav.ViewModels.Settings;
 using PSNav.ViewModels.Shell;
 using PSNav.Views.Shell;
 
@@ -41,14 +46,17 @@ public class App : Application
         // Register Services
         services.AddSingleton<IDatabaseService, DatabaseService>();
         services.AddSingleton<IPlayStationApiClient, PlayStationApiClient>();
+        services.AddSingleton<IBackloggeryClient, BackloggeryClient>();
         services.AddSingleton<IAccountsRepository, AccountsRepository>();
         services.AddSingleton<IEntitlementsRepository, EntitlementsRepository>();
         services.AddSingleton<IConsolesRepository, ConsolesRepository>();
         services.AddSingleton<IPatchesRepository, PatchesRepository>();
         services.AddSingleton<ISettingsRepository, SettingsRepository>();
+        services.AddSingleton<IBackloggerySyncRepository, BackloggerySyncRepository>();
         services.AddSingleton<IWindowPlacementStore, WindowPlacementStore>();
         services.AddSingleton<IAccountService, AccountService>();
         services.AddSingleton<IPatchService, PatchService>();
+        services.AddSingleton<IBackloggerySyncService, BackloggerySyncService>();
         services.AddSingleton<IDialogService, DialogService>();
 
         // Register ViewModels
@@ -56,7 +64,9 @@ public class App : Application
         services.AddSingleton<AccountsViewModel>();
         services.AddSingleton<EntitlementsViewModel>();
         services.AddSingleton<ConsolesViewModel>();
+        services.AddSingleton<BackloggeryViewModel>();
         services.AddSingleton<PatchesViewModel>();
+        services.AddSingleton<SettingsViewModel>();
 
         Services = services.BuildServiceProvider();
 

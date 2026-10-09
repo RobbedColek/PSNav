@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:PSNav.ViewModels.Settings"
+             xmlns:models="clr-namespace:PSNav.Models.Backloggery"
+             xmlns:converters="clr-namespace:PSNav.Converters"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
+             x:Class="PSNav.Views.Settings.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <UserControl.Resources>
+        <converters:BackloggeryEnumToStringConverter x:Key="BackloggeryEnumToStringConverter" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#FF101010" />
+            <Setter Property="BorderBrush" Value="#FF242424" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+        <Style Selector="TextBlock.cardTitle">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="TextBlock.description">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#FF9A9A9A" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer>
+        <StackPanel Spacing="16" MaxWidth="1500" Margin="0,0,12,16">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Settings"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                <StackPanel Grid.Column="0" Spacing="16">
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="cardTitle" Text="Backloggery" />
+                            <StackPanel Spacing="4" Margin="0,6,0,0">
+                                <TextBlock Text="PS4/PS5 Duplicates"
+                                           Foreground="White"
+                                           TextWrapping="Wrap" />
+                                <TextBlock Classes="description"
+                                           Text="When you own the same game on PS4 and PS5, upload both versions or choose one platform." />
+                            </StackPanel>
+                            <ComboBox ItemsSource="{Binding CrossPlatformModes}"
+                                      SelectedItem="{Binding Backloggery.CrossPlatformMode}"
+                                      IsEnabled="{Binding !Backloggery.IsBusy}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:BackloggeryCrossPlatformMode">
+                                        <TextBlock Text="{Binding Converter={StaticResource BackloggeryEnumToStringConverter}}"
+                                                   TextWrapping="Wrap" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <StackPanel Spacing="4" Margin="0,6,0,0">
+                                <TextBlock Text="Default Priority" Foreground="White" />
+                                <ComboBox x:Name="DefaultPriorityComboBox"
+                                          ItemsSource="{Binding Priorities}"
+                                          SelectedItem="{Binding Backloggery.DefaultPriority}"
+                                          IsEnabled="{Binding !Backloggery.IsBusy}"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:BackloggeryPriority">
+                                            <TextBlock Text="{Binding Converter={StaticResource BackloggeryEnumToStringConverter}}"
+                                                       TextWrapping="Wrap" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Spacing="4" Margin="0,6,0,0">
+                                <TextBlock Text="Default Status" Foreground="White" />
+                                <ComboBox x:Name="DefaultStatusComboBox"
+                                          ItemsSource="{Binding Statuses}"
+                                          SelectedItem="{Binding Backloggery.DefaultStatus}"
+                                          IsEnabled="{Binding !Backloggery.IsBusy}"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:BackloggeryGameStatus">
+                                            <TextBlock Text="{Binding Converter={StaticResource BackloggeryEnumToStringConverter}}"
+                                                       TextWrapping="Wrap" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Spacing="4" Margin="0,6,0,0">
+                                <CheckBox Content="Stealth Save"
+                                          IsChecked="{Binding Backloggery.UseStealthSave}"
+                                          IsEnabled="{Binding !Backloggery.IsBusy}" />
+                                <TextBlock Classes="description"
+                                           Text="Use Backloggery's Stealth Save when adding games." />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="16" />
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
