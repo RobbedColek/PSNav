@@ -1,71 +1,54 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        d:DesignWidth="640"
-        x:Class="PSNav.Views.Accounts.AddAccountWindow"
-        Title="Add account"
-        Width="640"
-        SizeToContent="Height"
-        WindowStartupLocation="CenterOwner"
-        SystemDecorations="BorderOnly"
-        CanResize="False">
+﻿<colek:DialogWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:colek="https://github.com/RobbedColek/ColekUI"
+                    mc:Ignorable="d"
+                    d:DesignWidth="640"
+                    x:Class="PSNav.Views.Accounts.AddAccountWindow"
+                    Title="Add account"
+                    Header="Add account"
+                    Description="Open the following link in your browser while signed in to PlayStation Network, then paste the JSON output below."
+                    Width="640">
 
-    <Grid RowDefinitions="Auto,Auto,Auto"
-          Margin="20"
-          RowSpacing="10">
-        <StackPanel Grid.Row="0"
-                    Spacing="8">
-            <TextBlock Text="Add account"
-                       FontSize="24"
-                       FontWeight="SemiBold" />
+    <StackPanel Spacing="8">
+        <HyperlinkButton Content="https://ca.account.sony.com/api/v1/ssocookie"
+                         NavigateUri="https://ca.account.sony.com/api/v1/ssocookie"
+                         Padding="0"
+                         Foreground="#FF64B5F6" />
 
-            <TextBlock Text="Open the following link in your browser while signed in to PlayStation Network, then paste the JSON output below."
-                       TextWrapping="Wrap"
-                       Foreground="#FFBDBDBD" />
+        <TextBox x:Name="SsoCookieJsonTextBox"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalContentAlignment="Top"
+                 MinHeight="60"
+                 MaxHeight="120"
+                 PlaceholderText="{}{ &quot;npsso&quot;: &quot;&lt;NPSSO_TOKEN&gt;&quot;, &quot;expires_in&quot;: XXXXXX }" />
 
-            <HyperlinkButton Content="https://ca.account.sony.com/api/v1/ssocookie"
-                             NavigateUri="https://ca.account.sony.com/api/v1/ssocookie"
-                             Padding="0"
-                             Foreground="#FF64B5F6" />
-        </StackPanel>
+        <TextBlock x:Name="ErrorTextBlock"
+                   Foreground="#FFFF6B6B"
+                   TextWrapping="Wrap"
+                   IsVisible="False" />
+    </StackPanel>
 
-        <StackPanel Grid.Row="1"
-                    Spacing="8">
-            <TextBox x:Name="SsoCookieJsonTextBox"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     VerticalContentAlignment="Top"
-                     MinHeight="60"
-                     MaxHeight="120"
-                     Watermark="{}{ &quot;npsso&quot;: &quot;&lt;NPSSO_TOKEN&gt;&quot;, &quot;expires_in&quot;: XXXXXX }" />
+    <colek:DialogWindow.Buttons>
+        <ProgressBar x:Name="AddAccountProgressBar"
+                     Width="90"
+                     Height="18"
+                     VerticalAlignment="Center"
+                     IsIndeterminate="True"
+                     IsVisible="False" />
 
-            <TextBlock x:Name="ErrorTextBlock"
-                       Foreground="#FFFF6B6B"
-                       TextWrapping="Wrap"
-                       IsVisible="False" />
-        </StackPanel>
+        <Button x:Name="AddAccountButton"
+                MinWidth="110"
+                Content="Add account"
+                IsDefault="True"
+                Click="Add_Click" />
 
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8">
-            <ProgressBar x:Name="AddAccountProgressBar"
-                         Width="90"
-                         Height="18"
-                         VerticalAlignment="Center"
-                         IsIndeterminate="True"
-                         IsVisible="False" />
-
-            <Button x:Name="AddAccountButton"
-                    MinWidth="110"
-                    Content="Add account"
-                    Click="Add_Click" />
-
-            <Button MinWidth="90"
-                    Content="Cancel"
-                    Click="Cancel_Click" />
-        </StackPanel>
-    </Grid>
-</Window>
+        <Button x:Name="CancelButton"
+                MinWidth="90"
+                Content="Cancel"
+                IsCancel="True"
+                Click="Cancel_Click" />
+    </colek:DialogWindow.Buttons>
+</colek:DialogWindow>

@@ -1,76 +1,57 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        d:DesignWidth="500"
-        d:DesignHeight="250"
-        x:Class="PSNav.Views.Consoles.RegisterConsoleWindow"
-        Title="Register Console"
-        Width="500"
-        Height="260"
-        MinWidth="500"
-        MinHeight="260"
-        WindowStartupLocation="CenterOwner"
-        SystemDecorations="BorderOnly"
-        CanResize="False">
+<colek:DialogWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:colek="https://github.com/RobbedColek/ColekUI"
+                    mc:Ignorable="d"
+                    d:DesignWidth="500"
+                    d:DesignHeight="250"
+                    x:Class="PSNav.Views.Consoles.RegisterConsoleWindow"
+                    Title="Register Console"
+                    Header="Register Console"
+                    Description="Enter a name and select the entitlements.db file."
+                    Width="500"
+                    MinWidth="500">
 
-    <Grid RowDefinitions="Auto,*,Auto"
-          Margin="20"
-          RowSpacing="16">
-
-        <StackPanel Grid.Row="0"
-                    Spacing="4">
-            <TextBlock Text="Register Console"
-                       FontSize="24"
-                       FontWeight="SemiBold" />
-            <TextBlock Text="Enter a name and select the entitlements.db file."
-                       Foreground="#FFBDBDBD"
-                       FontSize="12" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="1"
-                    Spacing="12">
-            <StackPanel Spacing="4">
-                <TextBlock Text="Console Name"
-                           FontSize="12"
-                           Foreground="#FF9A9A9A" />
-                <TextBox x:Name="ConsoleNameTextBox"
-                         Watermark="e.g. My PS4 Pro" />
-            </StackPanel>
-
-            <StackPanel Spacing="4">
-                <TextBlock Text="Entitlements Database File"
-                           FontSize="12"
-                           Foreground="#FF9A9A9A" />
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <TextBox x:Name="FilePathTextBox"
-                             IsReadOnly="True"
-                             Watermark="Select entitlements.db..." />
-                    <Button Grid.Column="1"
-                            Content="Browse..."
-                            Click="Browse_Click" />
-                </Grid>
-            </StackPanel>
-
-            <TextBlock x:Name="ErrorTextBlock"
-                       Foreground="#FFFF6B6B"
+    <StackPanel Spacing="12">
+        <StackPanel Spacing="4">
+            <TextBlock Text="Console Name"
                        FontSize="12"
-                       TextWrapping="Wrap"
-                       IsVisible="False" />
+                       Foreground="#FF9A9A9A" />
+            <TextBox x:Name="ConsoleNameTextBox"
+                     PlaceholderText="e.g. My PS4 Pro" />
         </StackPanel>
 
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8">
-            <Button x:Name="RegisterButton"
-                    MinWidth="110"
-                    Content="Register"
-                    Click="Register_Click" />
-            <Button MinWidth="90"
-                    Content="Cancel"
-                    Click="Cancel_Click" />
+        <StackPanel Spacing="4">
+            <TextBlock Text="Entitlements Database File"
+                       FontSize="12"
+                       Foreground="#FF9A9A9A" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox x:Name="FilePathTextBox"
+                         IsReadOnly="True"
+                         PlaceholderText="Select entitlements.db..." />
+                <Button Grid.Column="1"
+                        Content="Browse..."
+                        Click="Browse_Click" />
+            </Grid>
         </StackPanel>
-    </Grid>
-</Window>
+
+        <TextBlock x:Name="ErrorTextBlock"
+                   Foreground="#FFFF6B6B"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   IsVisible="False" />
+    </StackPanel>
+
+    <colek:DialogWindow.Buttons>
+        <Button x:Name="RegisterButton"
+                MinWidth="110"
+                Content="Register"
+                IsDefault="True"
+                Click="Register_Click" />
+        <Button MinWidth="90"
+                Content="Cancel"
+                IsCancel="True"
+                Click="Cancel_Click" />
+    </colek:DialogWindow.Buttons>
+</colek:DialogWindow>

@@ -9,22 +9,24 @@ using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using ColekUI.Controls;
+using ColekUI.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Models.Entitlements;
 using PSNav.ViewModels.Entitlements;
-using PSNav.Views.Common;
-using PSNav.Views.Shell;
 
 namespace PSNav.Views.Entitlements;
 
 public partial class EntitlementsView : UserControl
 {
     private readonly EntitlementsViewModel _viewModel;
+    private readonly IDialogService _dialogs;
 
     public EntitlementsView()
     {
         InitializeComponent();
 
+        _dialogs = App.GetServices().GetRequiredService<IDialogService>();
         _viewModel = App.GetServices().GetRequiredService<EntitlementsViewModel>();
         DataContext = _viewModel;
 
@@ -105,11 +107,11 @@ public partial class EntitlementsView : UserControl
     {
         var rows = EntitlementsGrid.CollectionView?.Cast<Entitlement>().ToList() ?? [];
 
-        MainWindow? mainWindow = VisualRoot as MainWindow;
-        mainWindow?.IsBlurred = true;
+        TopLevel? topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null) return;
 
         IStorageFile? file;
-        try
+        using ((topLevel as IBlurrable)?.PushBlur())
         {
             FilePickerSaveOptions options = new()
             {
@@ -126,11 +128,7 @@ public partial class EntitlementsView : UserControl
                 ]
             };
 
-            file = await (VisualRoot as Window)!.StorageProvider.SaveFilePickerAsync(options);
-        }
-        finally
-        {
-            mainWindow?.IsBlurred = false;
+            file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
         }
 
         if (file == null)
@@ -160,18 +158,7 @@ public partial class EntitlementsView : UserControl
 
     private async Task ShowErrorAsync(string title, Exception exception)
     {
-        MainWindow? mainWindow = VisualRoot as MainWindow;
-        mainWindow?.IsBlurred = true;
-
-        try
-        {
-            ErrorDialog dialog = new(title, exception.Message);
-            await dialog.ShowDialog(mainWindow ?? (Window)VisualRoot!);
-        }
-        finally
-        {
-            mainWindow?.IsBlurred = false;
-        }
+        await _dialogs.ShowErrorAsync(title, exception.Message, owner: TopLevel.GetTopLevel(this) as Window);
     }
 
     private void ShowAllForSelectedEntitlement_Click(object? sender, RoutedEventArgs e)

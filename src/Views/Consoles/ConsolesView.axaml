@@ -5,7 +5,7 @@
              xmlns:modelsConsoles="clr-namespace:PSNav.Models.Consoles"
              xmlns:modelsAccounts="clr-namespace:PSNav.Models.Accounts"
              xmlns:converters="clr-namespace:PSNav.Converters"
-             xmlns:iconPacks="clr-namespace:IconPacks.Avalonia.Codicons;assembly=IconPacks.Avalonia.Codicons"
+             xmlns:colek="https://github.com/RobbedColek/ColekUI"
              xmlns:vm="clr-namespace:PSNav.ViewModels.Consoles"
              mc:Ignorable="d"
              d:DesignWidth="1000"
@@ -33,9 +33,12 @@
                     Padding="0"
                     VerticalAlignment="Center"
                     Click="RegisterConsole_Click">
-                <iconPacks:PackIconCodicons Kind="Add"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center" />
+                <colek:Codicon Data="{StaticResource Codicon.Add}"
+                               Width="20"
+                               Height="20"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
             </Button>
         </Grid>
 
@@ -79,10 +82,11 @@
                                             Padding="4"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
-                                        <iconPacks:PackIconCodicons Kind="Refresh"
-                                                                    Width="14"
-                                                                    Height="14"
-                                                                    Foreground="#FF9A9A9A" />
+                                        <colek:Codicon Data="{StaticResource Codicon.Refresh}"
+                                                       Stretch="Uniform"
+                                                       Width="14"
+                                                       Height="14"
+                                                       Foreground="#FF9A9A9A" />
                                     </Button>
                                     <Button Click="DeleteConsole_Click"
                                             ToolTip.Tip="Delete Console"
@@ -90,10 +94,11 @@
                                             Padding="4"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
-                                        <iconPacks:PackIconCodicons Kind="Trash"
-                                                                    Width="14"
-                                                                    Height="14"
-                                                                    Foreground="#FF9A9A9A" />
+                                        <colek:Codicon Data="{StaticResource Codicon.Trash}"
+                                                       Stretch="Uniform"
+                                                       Width="14"
+                                                       Height="14"
+                                                       Foreground="#FF9A9A9A" />
                                     </Button>
                                 </StackPanel>
                             </Grid>

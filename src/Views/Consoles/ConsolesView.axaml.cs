@@ -3,23 +3,25 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using ColekUI.Controls;
+using ColekUI.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Models.Accounts;
 using PSNav.Models.Consoles;
 using PSNav.ViewModels.Consoles;
-using PSNav.Views.Common;
-using PSNav.Views.Shell;
 
 namespace PSNav.Views.Consoles;
 
 public partial class ConsolesView : UserControl
 {
     private readonly ConsolesViewModel _viewModel;
+    private readonly IDialogService _dialogs;
 
     public ConsolesView()
     {
         InitializeComponent();
 
+        _dialogs = App.GetServices().GetRequiredService<IDialogService>();
         _viewModel = App.GetServices().GetRequiredService<ConsolesViewModel>();
         DataContext = _viewModel;
     }
@@ -44,11 +46,11 @@ public partial class ConsolesView : UserControl
     {
         if (_viewModel.SelectedConsole == null) return;
 
-        MainWindow? mainWindow = VisualRoot as MainWindow;
-        mainWindow?.IsBlurred = true;
+        TopLevel? topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null) return;
 
         string? filePath = null;
-        try
+        using ((topLevel as IBlurrable)?.PushBlur())
         {
             FilePickerOpenOptions options = new()
             {
@@ -63,15 +65,11 @@ public partial class ConsolesView : UserControl
                 ]
             };
 
-            var result = await (VisualRoot as Window)!.StorageProvider.OpenFilePickerAsync(options);
+            var result = await topLevel.StorageProvider.OpenFilePickerAsync(options);
             if (result.Count > 0)
             {
                 filePath = result[0].Path.LocalPath;
             }
-        }
-        finally
-        {
-            mainWindow?.IsBlurred = false;
         }
 
         if (filePath != null)
@@ -89,30 +87,20 @@ public partial class ConsolesView : UserControl
 
     private async void RegisterConsole_Click(object? sender, RoutedEventArgs e)
     {
-        MainWindow? mainWindow = VisualRoot as MainWindow;
-        mainWindow?.IsBlurred = true;
-
         string? name = null;
         System.Collections.Generic.List<string>? profileIds = null;
         string? filePath = null;
         bool shouldRegister = false;
 
-        try
-        {
-            RegisterConsoleWindow dialog = new();
-            bool result = await dialog.ShowDialog<bool>(mainWindow ?? (Window)VisualRoot!);
+        RegisterConsoleWindow dialog = new();
+        bool result = await _dialogs.ShowAsync<bool>(dialog, TopLevel.GetTopLevel(this) as Window);
 
-            if (result && dialog is { ConsoleName: not null, ProfileIds: not null, EntitlementsFilePath: not null })
-            {
-                name = dialog.ConsoleName;
-                profileIds = dialog.ProfileIds;
-                filePath = dialog.EntitlementsFilePath;
-                shouldRegister = true;
-            }
-        }
-        finally
+        if (result && dialog is { ConsoleName: not null, ProfileIds: not null, EntitlementsFilePath: not null })
         {
-            mainWindow?.IsBlurred = false;
+            name = dialog.ConsoleName;
+            profileIds = dialog.ProfileIds;
+            filePath = dialog.EntitlementsFilePath;
+            shouldRegister = true;
         }
 
         if (shouldRegister && name != null && profileIds != null && filePath != null)
@@ -130,40 +118,19 @@ public partial class ConsolesView : UserControl
 
     private async Task ShowErrorAsync(string title, Exception exception)
     {
-        MainWindow? mainWindow = VisualRoot as MainWindow;
-        mainWindow?.IsBlurred = true;
-
-        try
-        {
-            ErrorDialog dialog = new(title, exception.Message);
-            await dialog.ShowDialog(mainWindow ?? (Window)VisualRoot!);
-        }
-        finally
-        {
-            mainWindow?.IsBlurred = false;
-        }
+        await _dialogs.ShowErrorAsync(title, exception.Message, owner: TopLevel.GetTopLevel(this) as Window);
     }
 
     private async void DeleteConsole_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button { DataContext: ConsoleModel console }) return;
-        MainWindow? mainWindow = VisualRoot as MainWindow;
-        mainWindow?.IsBlurred = true;
+        var result = await _dialogs.ConfirmAsync("Remove console",
+            $"Are you sure you want to remove console '{console.Name}'? This will also remove all related profiles and entitlements.",
+            owner: TopLevel.GetTopLevel(this) as Window);
 
-        try
+        if (result)
         {
-            ConfirmDialog dialog = new("Remove console",
-                $"Are you sure you want to remove console '{console.Name}'? This will also remove all related profiles and entitlements.");
-            var result = await dialog.ShowDialog<bool>(mainWindow ?? (Window)VisualRoot!);
-
-            if (result)
-            {
-                _viewModel.DeleteConsole(console);
-            }
-        }
-        finally
-        {
-            mainWindow?.IsBlurred = false;
+            _viewModel.DeleteConsole(console);
         }
     }
 }

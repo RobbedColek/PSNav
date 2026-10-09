@@ -83,7 +83,11 @@ Account NPSSO tokens are stored in that database as plain text, so keep the file
 
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
+The UI comes from the ColekUI git submodule, so clone with `--recursive` before building.
+
 ```bash
+git clone --recursive https://github.com/RobbedColek/PSNav.git
+git submodule update --init    # if you cloned without --recursive
 dotnet run --project src/PSNav.csproj
 ```
 

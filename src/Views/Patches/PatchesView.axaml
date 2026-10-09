@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:PSNav.Models.Patches"
              xmlns:converters="clr-namespace:PSNav.Converters"
-             xmlns:iconPacks="clr-namespace:IconPacks.Avalonia.PhosphorIcons;assembly=IconPacks.Avalonia.PhosphorIcons"
+             xmlns:colek="https://github.com/RobbedColek/ColekUI"
              xmlns:patches="clr-namespace:PSNav.ViewModels.Patches"
              mc:Ignorable="d"
              d:DesignWidth="1000"
@@ -37,7 +37,7 @@
                     VerticalAlignment="Center"
                     Command="{Binding UploadCommand}"
                     ToolTip.Tip="Upload">
-                <iconPacks:PhosphorIcons Kind="UploadSimple" />
+                <colek:Codicon Data="{StaticResource Phosphor.UploadSimple}" Width="20" Height="20" Stretch="Uniform" />
             </Button>
         </Grid>
 

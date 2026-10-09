@@ -4,21 +4,23 @@ using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Platform;
+using ColekUI.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Models.Accounts;
 using PSNav.ViewModels.Accounts;
-using PSNav.Views.Shell;
 
 namespace PSNav.Views.Accounts;
 
 public partial class AccountsView : UserControl
 {
     private readonly AccountsViewModel _viewModel;
+    private readonly IDialogService _dialogs;
 
     public AccountsView()
     {
         InitializeComponent();
 
+        _dialogs = App.GetServices().GetRequiredService<IDialogService>();
         _viewModel = App.GetServices().GetRequiredService<AccountsViewModel>();
         DataContext = _viewModel;
 
@@ -27,61 +29,37 @@ public partial class AccountsView : UserControl
 
     private async void AddAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is not MainWindow owner)
+        AddAccountWindow dialog = new();
+
+        Account? account = await _dialogs.ShowAsync<Account?>(dialog, TopLevel.GetTopLevel(this) as Window);
+
+        if (account is null)
             return;
 
-        owner.IsBlurred = true;
-
-        try
-        {
-            AddAccountWindow dialog = new();
-
-            Account? account = await dialog.ShowDialog<Account?>(owner);
-
-            if (account is null)
-                return;
-
-            _viewModel.SaveAccount(account);
-        }
-        finally
-        {
-            owner.IsBlurred = false;
-        }
+        _viewModel.SaveAccount(account);
     }
 
     private async void AddOfflineAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is not MainWindow owner)
+        AddOfflineAccountWindow dialog = new();
+
+        string? onlineId = await _dialogs.ShowAsync<string?>(dialog, TopLevel.GetTopLevel(this) as Window);
+
+        if (string.IsNullOrWhiteSpace(onlineId))
             return;
 
-        owner.IsBlurred = true;
+        string accountId = _viewModel.GenerateOfflineAccountId();
 
-        try
+        Account account = new()
         {
-            AddOfflineAccountWindow dialog = new();
+            AccountId = accountId,
+            OnlineId = onlineId,
+            AvatarPicture = LoadOfflineAccountAvatar(),
+            CreatedAt = DateTimeOffset.Now,
+            UpdatedAt = DateTimeOffset.Now
+        };
 
-            string? onlineId = await dialog.ShowDialog<string?>(owner);
-
-            if (string.IsNullOrWhiteSpace(onlineId))
-                return;
-
-            string accountId = _viewModel.GenerateOfflineAccountId();
-
-            Account account = new()
-            {
-                AccountId = accountId,
-                OnlineId = onlineId,
-                AvatarPicture = LoadOfflineAccountAvatar(),
-                CreatedAt = DateTimeOffset.Now,
-                UpdatedAt = DateTimeOffset.Now
-            };
-
-            _viewModel.SaveAccount(account);
-        }
-        finally
-        {
-            owner.IsBlurred = false;
-        }
+        _viewModel.SaveAccount(account);
     }
 
     private static byte[] LoadOfflineAccountAvatar()
@@ -101,27 +79,15 @@ public partial class AccountsView : UserControl
 
         if (expiredAccounts.Count > 0)
         {
-            if (TopLevel.GetTopLevel(this) is not MainWindow owner)
+            bool result = await _dialogs.ConfirmAsync("Expired NPSSO tokens",
+                "The following accounts have expired NPSSO tokens:\n" +
+                string.Join("\n", expiredAccounts.Select(name => $"  • {name}")) + "\n\n" +
+                "You can refresh a token using the button next to an account entry.\n" +
+                "Do you want to continue? Only accounts with valid NPSSO tokens will be synchronized.",
+                owner: TopLevel.GetTopLevel(this) as Window);
+
+            if (!result)
                 return;
-
-            owner.IsBlurred = true;
-
-            try
-            {
-                Common.ConfirmDialog dialog = new("Expired NPSSO tokens",
-                    "The following accounts have expired NPSSO tokens:\n" +
-                    string.Join("\n", expiredAccounts.Select(name => $"  • {name}")) + "\n\n" +
-                    "You can refresh a token using the button next to an account entry.\n" +
-                    "Do you want to continue? Only accounts with valid NPSSO tokens will be synchronized.");
-                bool result = await dialog.ShowDialog<bool>(owner);
-
-                if (!result)
-                    return;
-            }
-            finally
-            {
-                owner.IsBlurred = false;
-            }
         }
 
         await _viewModel.SynchronizeCommand.ExecuteAsync(null);
@@ -132,31 +98,19 @@ public partial class AccountsView : UserControl
         if (sender is not Button { DataContext: Account account })
             return;
 
-        if (TopLevel.GetTopLevel(this) is not MainWindow owner)
+        AddAccountWindow dialog = new();
+
+        Account? newAccount = await _dialogs.ShowAsync<Account?>(dialog, TopLevel.GetTopLevel(this) as Window);
+
+        if (newAccount is null)
             return;
 
-        owner.IsBlurred = true;
+        account.NpssoToken = newAccount.NpssoToken;
+        account.NpssoTokenExpiration = newAccount.NpssoTokenExpiration;
+        account.AccessToken = null;
+        account.UpdatedAt = DateTimeOffset.Now;
 
-        try
-        {
-            AddAccountWindow dialog = new();
-
-            Account? newAccount = await dialog.ShowDialog<Account?>(owner);
-
-            if (newAccount is null)
-                return;
-
-            account.NpssoToken = newAccount.NpssoToken;
-            account.NpssoTokenExpiration = newAccount.NpssoTokenExpiration;
-            account.AccessToken = null;
-            account.UpdatedAt = DateTimeOffset.Now;
-
-            _viewModel.UpdateAccount(account);
-        }
-        finally
-        {
-            owner.IsBlurred = false;
-        }
+        _viewModel.UpdateAccount(account);
     }
 
 
@@ -165,23 +119,11 @@ public partial class AccountsView : UserControl
         if (sender is not Button { DataContext: Account account })
             return;
 
-        if (TopLevel.GetTopLevel(this) is not MainWindow owner)
-            return;
+        bool result = await _dialogs.ConfirmAsync("Remove account",
+            $"Are you sure you want to remove account '{account.OnlineId ?? account.AccountId}'? This will also remove all related entitlements.",
+            owner: TopLevel.GetTopLevel(this) as Window);
 
-        owner.IsBlurred = true;
-
-        try
-        {
-            Common.ConfirmDialog dialog = new("Remove account",
-                $"Are you sure you want to remove account '{account.OnlineId ?? account.AccountId}'? This will also remove all related entitlements.");
-            bool result = await dialog.ShowDialog<bool>(owner);
-
-            if (result)
-                _viewModel.DeleteAccount(account);
-        }
-        finally
-        {
-            owner.IsBlurred = false;
-        }
+        if (result)
+            _viewModel.DeleteAccount(account);
     }
 }

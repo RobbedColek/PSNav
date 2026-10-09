@@ -1,10 +1,7 @@
 using System;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
-using IconPacks.Avalonia.BootstrapIcons;
-using IconPacks.Avalonia.Codicons;
-using IconPacks.Avalonia.PhosphorIcons;
-using PSNav.Models.Shell;
+using ColekUI.Navigation;
+using Microsoft.Extensions.DependencyInjection;
+using PSNav.Resources;
 using PSNav.ViewModels.Accounts;
 using PSNav.ViewModels.Consoles;
 using PSNav.ViewModels.Entitlements;
@@ -12,57 +9,39 @@ using PSNav.ViewModels.Patches;
 
 namespace PSNav.ViewModels.Shell;
 
-public partial class MainViewModel : ViewModelBase
+public class MainViewModel : ViewModelBase
 {
-    [ObservableProperty] public partial ViewModelBase? CurrentPage { get; set; }
-    [ObservableProperty] public partial NavigationItem? SelectedMenuItem { get; set; }
-    public ObservableCollection<NavigationItem> MenuItems { get; } = [];
-    public ObservableCollection<NavigationItem> BottomMenuItems { get; } = [];
-
-    private readonly IServiceProvider _serviceProvider;
+    public INavigator Navigation { get; }
 
     public MainViewModel(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider;
+        Navigation = new Navigator(t => serviceProvider.GetRequiredService(t));
 
-        MenuItems.Add(new NavigationItem(
+        Navigation.Items.Add(new NavigationItem(
             "Entitlements",
-            PackIconCodiconsKind.Database,
-            typeof(PackIconCodicons),
+            AppIcons.Get("Codicon.Database"),
             typeof(EntitlementsViewModel)));
 
-        MenuItems.Add(new NavigationItem(
+        Navigation.Items.Add(new NavigationItem(
             "Accounts",
-            PackIconBootstrapIconsKind.Playstation,
-            typeof(PackIconBootstrapIcons),
+            AppIcons.Get("Bootstrap.Playstation"),
             typeof(AccountsViewModel)));
 
-        MenuItems.Add(new NavigationItem(
+        Navigation.Items.Add(new NavigationItem(
             "Consoles",
-            PackIconPhosphorIconsKind.GameController,
-            typeof(PackIconPhosphorIcons),
+            AppIcons.Get("Phosphor.GameController"),
             typeof(ConsolesViewModel)));
 
-        MenuItems.Add(new NavigationItem(
+        Navigation.Items.Add(new NavigationItem(
             "Patches",
-            PackIconPhosphorIconsKind.RocketLaunchLight,
-            typeof(PackIconPhosphorIcons),
+            AppIcons.Get("Phosphor.RocketLaunchLight"),
             typeof(PatchesViewModel)));
 
-//        BottomMenuItems.Add(new NavigationItem(
-//            "Settings", 
-//            PackIconCodiconsKind.SettingsGear, 
-//            typeof(PackIconCodicons), 
+//        Navigation.FooterItems.Add(new NavigationItem(
+//            "Settings",
+//            AppIcons.Get("Codicon.SettingsGear"),
 //            typeof(ViewModelBase)));
 
-        SelectedMenuItem = MenuItems[0];
-    }
-
-    partial void OnSelectedMenuItemChanged(NavigationItem? value)
-    {
-        if (value != null)
-        {
-            CurrentPage = (ViewModelBase)_serviceProvider.GetService(value.ViewModelType)!;
-        }
+        Navigation.SelectedItem = Navigation.Items[0];
     }
 }

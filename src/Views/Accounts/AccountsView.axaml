@@ -4,8 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:PSNav.Models.Accounts"
              xmlns:converters="clr-namespace:PSNav.Converters"
-             xmlns:iconPacks="clr-namespace:IconPacks.Avalonia.Codicons;assembly=IconPacks.Avalonia.Codicons"
-             xmlns:bootstrapIcons="clr-namespace:IconPacks.Avalonia.BootstrapIcons;assembly=IconPacks.Avalonia.BootstrapIcons"
+             xmlns:colek="https://github.com/RobbedColek/ColekUI"
              xmlns:accounts="clr-namespace:PSNav.ViewModels.Accounts"
              mc:Ignorable="d"
              d:DesignWidth="1000"
@@ -39,9 +38,12 @@
                     Click="Synchronize_Click"
                     IsEnabled="{Binding !IsSynchronizing}"
                     ToolTip.Tip="Synchronize">
-                <iconPacks:PackIconCodicons Kind="Sync"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center" />
+                <colek:Codicon Data="{StaticResource Codicon.Sync}"
+                               Width="20"
+                               Height="20"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
             </Button>
 
             <Button Grid.Column="2"
@@ -53,19 +55,22 @@
                     <MenuFlyout Placement="BottomEdgeAlignedRight">
                         <MenuItem Header="Add PSN Account" Click="AddAccount_Click">
                             <MenuItem.Icon>
-                                <bootstrapIcons:PackIconBootstrapIcons Kind="Playstation" Width="16" Height="16" />
+                                <colek:Codicon Data="{StaticResource Bootstrap.Playstation}" Width="16" Height="16" Stretch="Uniform" />
                             </MenuItem.Icon>
                         </MenuItem>
                         <MenuItem Header="Add Offline Account" Click="AddOfflineAccount_Click">
                             <MenuItem.Icon>
-                                <iconPacks:PackIconCodicons Kind="Person" Width="16" Height="16" />
+                                <colek:Codicon Data="{StaticResource Codicon.Person}" Width="16" Height="16" Stretch="Uniform" />
                             </MenuItem.Icon>
                         </MenuItem>
                     </MenuFlyout>
                 </Button.Flyout>
-                <iconPacks:PackIconCodicons Kind="Add"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center" />
+                <colek:Codicon Data="{StaticResource Codicon.Add}"
+                               Width="20"
+                               Height="20"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
             </Button>
         </Grid>
 
@@ -177,10 +182,11 @@
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             IsVisible="{Binding HasNpssoToken}">
-                                        <iconPacks:PackIconCodicons Kind="Refresh"
-                                                                    Width="16"
-                                                                    Height="16"
-                                                                    Foreground="#FF9A9A9A" />
+                                        <colek:Codicon Data="{StaticResource Codicon.Refresh}"
+                                                       Stretch="Uniform"
+                                                       Width="16"
+                                                       Height="16"
+                                                       Foreground="#FF9A9A9A" />
                                     </Button>
                                     <Button Click="DeleteAccount_Click"
                                             ToolTip.Tip="Delete Account"
@@ -189,10 +195,11 @@
                                             Margin="4,0"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
-                                        <iconPacks:PackIconCodicons Kind="Trash"
-                                                                    Width="16"
-                                                                    Height="16"
-                                                                    Foreground="#FF9A9A9A" />
+                                        <colek:Codicon Data="{StaticResource Codicon.Trash}"
+                                                       Stretch="Uniform"
+                                                       Width="16"
+                                                       Height="16"
+                                                       Foreground="#FF9A9A9A" />
                                     </Button>
                                 </StackPanel>
                             </DataTemplate>

@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using ColekUI.Controls;
 using Microsoft.Data.Sqlite;
 
 namespace PSNav.Views.Consoles;
 
-public partial class RegisterConsoleWindow : Window
+public partial class RegisterConsoleWindow : DialogWindow
 {
     public string? ConsoleName { get; private set; }
     public string? EntitlementsFilePath { get; private set; }

@@ -1,9 +1,9 @@
-using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ColekUI.Controls;
 
 namespace PSNav.Views.Accounts;
 
-public partial class AddOfflineAccountWindow : Window
+public partial class AddOfflineAccountWindow : DialogWindow
 {
     private const int MaxProfileIdLength = 16;
 

@@ -1,3 +1,4 @@
 <Solution>
+    <Project Path="external\ColekUI\src\ColekUI\ColekUI.csproj"/>
     <Project Path="src\PSNav.csproj"/>
 </Solution>

@@ -1,18 +1,21 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:PSNav"
+             xmlns:colek="https://github.com/RobbedColek/ColekUI"
              x:Class="PSNav.App"
              RequestedThemeVariant="Dark">
-
     <Application.DataTemplates>
-        <local:ViewLocator />
+        <colek:CachingViewLocator />
     </Application.DataTemplates>
-
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://PSNav/Resources/Icons.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://IconPacks.Avalonia.Codicons/Codicons.axaml" />
-        <StyleInclude Source="avares://IconPacks.Avalonia.PhosphorIcons/PhosphorIcons.axaml" />
-        <StyleInclude Source="avares://IconPacks.Avalonia.BootstrapIcons/BootstrapIcons.axaml" />
+        <StyleInclude Source="avares://ColekUI/Theme/ColekTheme.axaml" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
     </Application.Styles>
 </Application>

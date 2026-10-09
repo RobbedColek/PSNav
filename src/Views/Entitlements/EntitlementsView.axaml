@@ -4,8 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:PSNav.Models.Entitlements"
              xmlns:converters="clr-namespace:PSNav.Converters"
-             xmlns:codicons="clr-namespace:IconPacks.Avalonia.Codicons;assembly=IconPacks.Avalonia.Codicons"
-             xmlns:phosphoricons="clr-namespace:IconPacks.Avalonia.PhosphorIcons;assembly=IconPacks.Avalonia.PhosphorIcons"
+             xmlns:colek="https://github.com/RobbedColek/ColekUI"
              xmlns:vm="clr-namespace:PSNav.ViewModels.Entitlements"
              mc:Ignorable="d"
              d:DesignWidth="1000"
@@ -63,15 +62,16 @@
                          Width="448"
                          Height="36"
                          VerticalAlignment="Center"
-                         Watermark="Search..."
+                         PlaceholderText="Search..."
                          Text="{Binding SearchText}">
                     <TextBox.InnerLeftContent>
-                        <codicons:PackIconCodicons Kind="Search"
-                                                   Width="14"
-                                                   Height="14"
-                                                   Margin="8,0,0,0"
-                                                   Foreground="#FF9A9A9A"
-                                                   VerticalAlignment="Center" />
+                        <colek:Codicon Data="{StaticResource Codicon.Search}"
+                                       Stretch="Uniform"
+                                       Width="14"
+                                       Height="14"
+                                       Margin="8,0,0,0"
+                                       Foreground="#FF9A9A9A"
+                                       VerticalAlignment="Center" />
                     </TextBox.InnerLeftContent>
                     <TextBox.InnerRightContent>
                         <Button Background="Transparent"
@@ -81,12 +81,13 @@
                                 Focusable="False"
                                 IsTabStop="False"
                                 Click="EmptySearchField_Click">
-                            <codicons:PackIconCodicons Kind="Trash"
-                                                       Width="16"
-                                                       Height="16"
-                                                       Foreground="#FF9A9A9A"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
+                            <colek:Codicon Data="{StaticResource Codicon.Trash}"
+                                           Stretch="Uniform"
+                                           Width="16"
+                                           Height="16"
+                                           Foreground="#FF9A9A9A"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
                         </Button>
                     </TextBox.InnerRightContent>
                 </TextBox>
@@ -110,7 +111,7 @@
                             </ListBox>
                         </Flyout>
                     </Button.Flyout>
-                    <phosphoricons:PhosphorIcons Kind="Columns" />
+                    <colek:Codicon Data="{StaticResource Phosphor.Columns}" Width="20" Height="20" Stretch="Uniform" />
                 </Button>
                 <Button Grid.Column="3"
                         MinWidth="36"
@@ -122,7 +123,7 @@
                         VerticalContentAlignment="Center"
                         ToolTip.Tip="Export to CSV"
                         Click="ExportToCsv_Click">
-                    <phosphoricons:PhosphorIcons Kind="FileCsv" />
+                    <colek:Codicon Data="{StaticResource Phosphor.FileCsv}" Width="20" Height="20" Stretch="Uniform" />
                 </Button>
             </Grid>
 
@@ -225,7 +226,7 @@
                                                         </ListBox>
                                                     </Flyout>
                                                 </Button.Flyout>
-                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                                <colek:Codicon Data="{StaticResource Codicon.Filter}" Width="12" Height="12" Stretch="Uniform" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -256,7 +257,7 @@
                                                         </ListBox>
                                                     </Flyout>
                                                 </Button.Flyout>
-                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                                <colek:Codicon Data="{StaticResource Codicon.Filter}" Width="12" Height="12" Stretch="Uniform" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -287,7 +288,7 @@
                                                         </ListBox>
                                                     </Flyout>
                                                 </Button.Flyout>
-                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                                <colek:Codicon Data="{StaticResource Codicon.Filter}" Width="12" Height="12" Stretch="Uniform" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -318,7 +319,7 @@
                                                         </ListBox>
                                                     </Flyout>
                                                 </Button.Flyout>
-                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                                <colek:Codicon Data="{StaticResource Codicon.Filter}" Width="12" Height="12" Stretch="Uniform" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -349,7 +350,7 @@
                                                         </ListBox>
                                                     </Flyout>
                                                 </Button.Flyout>
-                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                                <colek:Codicon Data="{StaticResource Codicon.Filter}" Width="12" Height="12" Stretch="Uniform" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -381,7 +382,7 @@
                                                         </ListBox>
                                                     </Flyout>
                                                 </Button.Flyout>
-                                                <codicons:PackIconCodicons Kind="Filter" Width="12" Height="12" />
+                                                <colek:Codicon Data="{StaticResource Codicon.Filter}" Width="12" Height="12" Stretch="Uniform" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -528,7 +529,7 @@
                 </Transitions>
             </Border.Transitions>
             <StackPanel Orientation="Horizontal" Spacing="8">
-                <codicons:PackIconCodicons Kind="Check" Width="16" Height="16" Foreground="#FF4CAF50" />
+                <colek:Codicon Data="{StaticResource Codicon.Check}" Width="16" Height="16" Foreground="#FF4CAF50" Stretch="Uniform" />
                 <TextBlock Name="ToastText"
                            VerticalAlignment="Center"
                            FontSize="14"

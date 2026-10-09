@@ -3,20 +3,33 @@ using System.Net.Http;
 using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ColekUI.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Models.Accounts;
 using PSNav.Services.Accounts;
 
 namespace PSNav.Views.Accounts;
 
-public partial class AddAccountWindow : Window
+public partial class AddAccountWindow : DialogWindow
 {
     private readonly IAccountService _accountService;
+    private bool _isAdding;
+    private bool _isClosingWithResult;
 
     public AddAccountWindow()
     {
         InitializeComponent();
         _accountService = App.GetServices().GetRequiredService<IAccountService>();
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        if (_isAdding && !_isClosingWithResult)
+        {
+            e.Cancel = true;
+        }
+
+        base.OnClosing(e);
     }
 
     private void Cancel_Click(object? sender, RoutedEventArgs e)
@@ -34,6 +47,7 @@ public partial class AddAccountWindow : Window
         {
             Account account = await _accountService.CreateAccountFromSsoCookieJsonAsync(json);
 
+            _isClosingWithResult = true;
             Close(account);
         }
         catch (Exception exception) when (exception is HttpRequestException or JsonException
@@ -55,7 +69,9 @@ public partial class AddAccountWindow : Window
 
     private void SetIsAddingAccount(bool isAdding)
     {
+        _isAdding = isAdding;
         AddAccountProgressBar.IsVisible = isAdding;
+        CancelButton.IsEnabled = !isAdding;
         AddAccountButton.IsEnabled = !isAdding;
         SsoCookieJsonTextBox.IsEnabled = !isAdding;
 

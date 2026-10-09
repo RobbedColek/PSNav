@@ -1,4 +1,4 @@
-using PSNav.Infrastructure.Windowing;
+using ColekUI.Windowing;
 
 namespace PSNav.Repositories.Settings;
 

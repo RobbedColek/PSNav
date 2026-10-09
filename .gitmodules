@@ -1,0 +1,3 @@
+[submodule "external/ColekUI"]
+	path = external/ColekUI
+	url = ../ColekUI.git

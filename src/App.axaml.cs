@@ -2,10 +2,11 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ColekUI.Dialogs;
+using ColekUI.Windowing;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Infrastructure.Database;
 using PSNav.Infrastructure.PlayStationApi;
-using PSNav.Infrastructure.Windowing;
 using PSNav.Repositories.Accounts;
 using PSNav.Repositories.Consoles;
 using PSNav.Repositories.Entitlements;
@@ -48,6 +49,7 @@ public class App : Application
         services.AddSingleton<IWindowPlacementStore, WindowPlacementStore>();
         services.AddSingleton<IAccountService, AccountService>();
         services.AddSingleton<IPatchService, PatchService>();
+        services.AddSingleton<IDialogService, DialogService>();
 
         // Register ViewModels
         services.AddSingleton<MainViewModel>();
