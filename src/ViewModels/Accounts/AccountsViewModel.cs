@@ -72,6 +72,7 @@ public sealed partial class AccountsViewModel(IAccountsRepository accountReposit
         accountRepository.Update(account);
 
         RefreshAccounts();
+        WeakReferenceMessenger.Default.Send(new AccountUpdatedMessage());
     }
 
     [RelayCommand]

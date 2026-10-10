@@ -48,6 +48,7 @@ public sealed partial class EntitlementsViewModel : ViewModelBase
         WeakReferenceMessenger.Default.Register<ConsolesChangedMessage>(this, (_, _) => RefreshAllEntitlements());
         WeakReferenceMessenger.Default.Register<AccountsSynchronizedMessage>(this, (_, _) => RefreshAllEntitlements());
         WeakReferenceMessenger.Default.Register<AccountDeletedMessage>(this, (_, _) => RefreshAllEntitlements());
+        WeakReferenceMessenger.Default.Register<AccountUpdatedMessage>(this, (_, _) => RefreshAllEntitlements());
     }
 
     public ObservableCollection<FilterOption> AvailableColumns { get; } = [];

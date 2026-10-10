@@ -96,7 +96,8 @@
                 CornerRadius="12"
                 Padding="0"
                 ClipToBounds="True">
-            <DataGrid ItemsSource="{Binding Accounts}"
+            <DataGrid x:Name="AccountsGrid"
+                      ItemsSource="{Binding Accounts}"
                       SelectedItem="{Binding SelectedAccount}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -107,6 +108,18 @@
                       CanUserSortColumns="True"
                       Background="Transparent"
                       BorderThickness="0">
+                <DataGrid.ContextMenu>
+                    <ContextMenu Opening="AccountsContextMenu_Opening">
+                        <MenuItem x:Name="RenameMenuItem"
+                                  Header="Rename"
+                                  Click="RenameAccount_Click" />
+                        <MenuItem x:Name="RefreshMenuItem"
+                                  Header="Refresh NPSSO Token"
+                                  Click="RefreshAccount_Click" />
+                        <MenuItem Header="Delete Account"
+                                  Click="DeleteAccount_Click" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Styles>
                     <Style Selector="DataGridColumnHeader">
                         <Setter Property="Background" Value="Transparent" />

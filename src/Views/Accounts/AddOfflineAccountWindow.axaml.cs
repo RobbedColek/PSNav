@@ -12,6 +12,15 @@ public partial class AddOfflineAccountWindow : DialogWindow
         InitializeComponent();
     }
 
+    public AddOfflineAccountWindow(string onlineId) : this()
+    {
+        Title = "Rename Offline Account";
+        Header = "Rename offline account";
+        Description = "Enter a new Profile ID for this offline account.";
+        OnlineIdTextBox.Text = onlineId;
+        AddButton.Content = "Rename";
+    }
+
     private void Cancel_Click(object? sender, RoutedEventArgs e)
     {
         Close(null);

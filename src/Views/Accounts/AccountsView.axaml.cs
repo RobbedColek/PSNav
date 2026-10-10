@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Platform;
+using Avalonia.VisualTree;
 using ColekUI.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using PSNav.Models.Accounts;
@@ -25,6 +29,47 @@ public partial class AccountsView : UserControl
         DataContext = _viewModel;
 
         AttachedToVisualTree += (_, _) => _viewModel.LoadAccountsCommand.Execute(null);
+        AccountsGrid.AddHandler(PointerPressedEvent, AccountsGrid_PointerPressed, RoutingStrategies.Tunnel);
+    }
+
+    private void AccountsGrid_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(AccountsGrid).Properties.IsRightButtonPressed)
+            return;
+
+        AccountsGrid.SelectedItem =
+            ((e.Source as Control)?.FindAncestorOfType<DataGridRow>(includeSelf: true))?.DataContext as Account;
+    }
+
+    private void AccountsContextMenu_Opening(object? sender, CancelEventArgs e)
+    {
+        Account? account = _viewModel.SelectedAccount;
+        RenameMenuItem.IsVisible = account is { HasNpssoToken: false };
+        RefreshMenuItem.IsVisible = account is { HasNpssoToken: true };
+        e.Cancel = account is null;
+    }
+
+    private Account? GetActionAccount(object? sender) => sender switch
+    {
+        Button { DataContext: Account account } => account,
+        MenuItem => _viewModel.SelectedAccount,
+        _ => null
+    };
+
+    private async void RenameAccount_Click(object? sender, RoutedEventArgs e)
+    {
+        if (GetActionAccount(sender) is not { HasNpssoToken: false } account)
+            return;
+
+        AddOfflineAccountWindow dialog = new(account.OnlineId ?? string.Empty);
+        string? onlineId = await _dialogs.ShowAsync<string?>(dialog, TopLevel.GetTopLevel(this) as Window);
+
+        if (string.IsNullOrWhiteSpace(onlineId) || onlineId == account.OnlineId)
+            return;
+
+        account.OnlineId = onlineId;
+        account.UpdatedAt = DateTimeOffset.Now;
+        _viewModel.UpdateAccount(account);
     }
 
     private async void AddAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -95,7 +140,7 @@ public partial class AccountsView : UserControl
 
     private async void RefreshAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (sender is not Button { DataContext: Account account })
+        if (GetActionAccount(sender) is not { HasNpssoToken: true } account)
             return;
 
         AddAccountWindow dialog = new();
@@ -116,7 +161,7 @@ public partial class AccountsView : UserControl
 
     private async void DeleteAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (sender is not Button { DataContext: Account account })
+        if (GetActionAccount(sender) is not { } account)
             return;
 
         bool result = await _dialogs.ConfirmAsync("Remove account",
