@@ -40,17 +40,24 @@ public partial class EntitlementsView : UserControl
 
     private async void CopyToClipboard_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (sender is not TextBlock textBlock || string.IsNullOrEmpty(textBlock.Text)) return;
+        if (sender is not TextBlock textBlock || string.IsNullOrEmpty(textBlock.Text))
+            return;
+        
         TopLevel? topLevel = TopLevel.GetTopLevel(this);
-        if (topLevel?.Clipboard is null) return;
+        if (topLevel?.Clipboard is null)
+            return;
+
         await topLevel.Clipboard.SetTextAsync(textBlock.Text);
+
         ShowCopiedMessage();
     }
 
     private void EntitlementImage_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         Entitlement? entitlement = _viewModel.SelectedEntitlement;
-        if (entitlement?.Image == null) return;
+
+        if (entitlement?.Image == null)
+            return;
 
         _viewModel.FullImageBytes = entitlement.Image;
         _viewModel.IsImageOverlayVisible = true;
@@ -59,9 +66,7 @@ public partial class EntitlementsView : UserControl
     private void ImageOverlay_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-        {
             _viewModel.IsImageOverlayVisible = false;
-        }
     }
 
     private async void FullImage_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -77,15 +82,19 @@ public partial class EntitlementsView : UserControl
         {
             e.Handled = true;
 
-            if (_viewModel.FullImageBytes == null) return;
+            if (_viewModel.FullImageBytes == null)
+                return;
 
             IClipboard? clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-            if (clipboard is null) return;
+            if (clipboard is null)
+                return;
 
             using MemoryStream ms = new(_viewModel.FullImageBytes);
+
             Bitmap bitmap = new(ms);
 
             await clipboard.SetBitmapAsync(bitmap);
+
             ShowCopiedMessage();
         }
     }
@@ -106,9 +115,12 @@ public partial class EntitlementsView : UserControl
     private async void ExportToCsv_Click(object? sender, RoutedEventArgs e)
     {
         var rows = EntitlementsGrid.CollectionView?.Cast<Entitlement>().ToList() ?? [];
+        if (rows.Count == 0)
+            return;
 
         TopLevel? topLevel = TopLevel.GetTopLevel(this);
-        if (topLevel is null) return;
+        if (topLevel is null)
+            return;
 
         IStorageFile? file;
         using ((topLevel as IBlurrable)?.PushBlur())

@@ -122,6 +122,7 @@
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         ToolTip.Tip="Export to CSV"
+                        IsEnabled="{Binding !!FilteredEntitlements.Count}"
                         Click="ExportToCsv_Click">
                     <colek:Codicon Data="{StaticResource Phosphor.FileCsv}" Width="20" Height="20" Stretch="Uniform" />
                 </Button>
