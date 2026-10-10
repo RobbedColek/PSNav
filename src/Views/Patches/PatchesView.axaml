@@ -13,6 +13,7 @@
              x:DataType="patches:PatchesViewModel">
 
     <UserControl.Resources>
+        <converters:ByteArrayToBitmapConverter x:Key="ByteArrayToBitmapConverter" />
         <converters:IsActiveToBrushConverter x:Key="IsActiveToBrushConverter" />
     </UserControl.Resources>
 
@@ -89,6 +90,28 @@
                     </Style>
                 </DataGrid.Styles>
                 <DataGrid.Columns>
+                    <DataGridTemplateColumn Header=""
+                                            Width="56"
+                                            CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:Patch">
+                                <Border Width="32"
+                                        Height="32"
+                                        CornerRadius="8"
+                                        ClipToBounds="True"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="#FF242424">
+                                    <Image
+                                        Source="{Binding Image, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=36}"
+                                        Width="32"
+                                        Height="32"
+                                        Stretch="Uniform"
+                                        RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Name"
                                         Binding="{Binding Name}"
                                         Width="*" />

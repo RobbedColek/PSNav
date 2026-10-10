@@ -20,7 +20,8 @@ public sealed class PatchesRepository(IDatabaseService databaseService) : IPatch
                 e.EntitlementID, 
                 e.Name, 
                 e.ReferencePackageUrl, 
-                p.IsSent 
+                p.IsSent,
+                e.Image
             FROM Entitlements e 
             LEFT JOIN PatchEntitlements p ON e.EntitlementID = p.EntitlementID
             WHERE e.ReferencePackageUrl IS NOT NULL
@@ -52,7 +53,8 @@ public sealed class PatchesRepository(IDatabaseService databaseService) : IPatch
                 e.EntitlementID, 
                 e.Name, 
                 e.ReferencePackageUrl, 
-                p.IsSent 
+                p.IsSent,
+                e.Image
             FROM Entitlements e 
             LEFT JOIN PatchEntitlements p ON e.EntitlementID = p.EntitlementID
             WHERE e.ReferencePackageUrl IS NOT NULL
@@ -107,7 +109,8 @@ public sealed class PatchesRepository(IDatabaseService databaseService) : IPatch
             EntitlementId = reader.GetString(0),
             Name = reader.IsDBNull(1) ? null : reader.GetString(1),
             ReferencePackageUrl = reader.IsDBNull(2) ? null : reader.GetString(2),
-            IsSent = !reader.IsDBNull(3) && reader.GetBoolean(3)
+            IsSent = !reader.IsDBNull(3) && reader.GetBoolean(3),
+            Image = reader.IsDBNull(4) ? null : (byte[])reader.GetValue(4)
         };
     }
 }
