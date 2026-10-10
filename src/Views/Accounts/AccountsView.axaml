@@ -6,6 +6,7 @@
              xmlns:converters="clr-namespace:PSNav.Converters"
              xmlns:colek="https://github.com/RobbedColek/ColekUI"
              xmlns:accounts="clr-namespace:PSNav.ViewModels.Accounts"
+             xmlns:controls="clr-namespace:PSNav.Views.Controls"
              mc:Ignorable="d"
              d:DesignWidth="1000"
              d:DesignHeight="650"
@@ -96,18 +97,18 @@
                 CornerRadius="12"
                 Padding="0"
                 ClipToBounds="True">
-            <DataGrid x:Name="AccountsGrid"
-                      ItemsSource="{Binding Accounts}"
-                      SelectedItem="{Binding SelectedAccount}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      GridLinesVisibility="Horizontal"
-                      HeadersVisibility="Column"
-                      CanUserReorderColumns="False"
-                      CanUserResizeColumns="False"
-                      CanUserSortColumns="True"
-                      Background="Transparent"
-                      BorderThickness="0">
+            <controls:RowActionDataGrid x:Name="AccountsGrid"
+                                       ItemsSource="{Binding Accounts}"
+                                       SelectedItem="{Binding SelectedAccount}"
+                                       AutoGenerateColumns="False"
+                                       IsReadOnly="True"
+                                       GridLinesVisibility="Horizontal"
+                                       HeadersVisibility="Column"
+                                       CanUserReorderColumns="False"
+                                       CanUserResizeColumns="False"
+                                       CanUserSortColumns="True"
+                                       Background="Transparent"
+                                       BorderThickness="0">
                 <DataGrid.ContextMenu>
                     <ContextMenu Opening="AccountsContextMenu_Opening">
                         <MenuItem x:Name="RenameMenuItem"
@@ -219,7 +220,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </DataGrid>
+            </controls:RowActionDataGrid>
         </Border>
     </Grid>
 </UserControl>

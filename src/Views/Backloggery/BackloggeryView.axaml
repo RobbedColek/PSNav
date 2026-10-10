@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:PSNav.Models.Backloggery"
              xmlns:converters="clr-namespace:PSNav.Converters"
              xmlns:colek="https://github.com/RobbedColek/ColekUI"
+             xmlns:controls="clr-namespace:PSNav.Views.Controls"
              xmlns:vm="clr-namespace:PSNav.ViewModels.Backloggery"
              xmlns:views="clr-namespace:PSNav.Views.Backloggery"
              mc:Ignorable="d"
@@ -183,19 +184,19 @@
                 Padding="0"
                 ClipToBounds="True">
             <Grid ColumnDefinitions="*,Auto">
-                <DataGrid Grid.Column="0"
-                          x:Name="ItemsGrid"
-                          ItemsSource="{Binding Items}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          SelectionMode="Extended"
-                          GridLinesVisibility="Horizontal"
-                          HeadersVisibility="Column"
-                          CanUserReorderColumns="False"
-                          CanUserResizeColumns="False"
-                          CanUserSortColumns="True"
-                          Background="Transparent"
-                          BorderThickness="0">
+                <controls:RowActionDataGrid Grid.Column="0"
+                                           x:Name="ItemsGrid"
+                                           ItemsSource="{Binding Items}"
+                                           AutoGenerateColumns="False"
+                                           IsReadOnly="True"
+                                           SelectionMode="Extended"
+                                           GridLinesVisibility="Horizontal"
+                                           HeadersVisibility="Column"
+                                           CanUserReorderColumns="False"
+                                           CanUserResizeColumns="False"
+                                           CanUserSortColumns="True"
+                                           Background="Transparent"
+                                           BorderThickness="0">
                     <DataGrid.ContextMenu>
                         <ContextMenu Opening="ItemsContextMenu_Opening">
                             <MenuItem x:Name="IgnoreMenuItem"
@@ -327,7 +328,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
-                </DataGrid>
+                </controls:RowActionDataGrid>
                 <Border Grid.Column="1" x:Name="EditorPanel"
                         Width="300" BorderBrush="#FF242424" BorderThickness="1,0,0,0"
                         Padding="12"
