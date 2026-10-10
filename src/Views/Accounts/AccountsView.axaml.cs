@@ -37,22 +37,33 @@ public partial class AccountsView : UserControl
         if (!e.GetCurrentPoint(AccountsGrid).Properties.IsRightButtonPressed)
             return;
 
-        AccountsGrid.SelectedItem =
-            ((e.Source as Control)?.FindAncestorOfType<DataGridRow>(includeSelf: true))?.DataContext as Account;
+        if ((e.Source as Control)?.FindAncestorOfType<DataGridRow>(includeSelf: true) is not
+            { DataContext: Account account })
+        {
+            AccountsGrid.SelectedItems.Clear();
+            return;
+        }
+
+        if (!AccountsGrid.SelectedItems.Contains(account))
+            AccountsGrid.SelectedItem = account;
     }
 
     private void AccountsContextMenu_Opening(object? sender, CancelEventArgs e)
     {
-        Account? account = _viewModel.SelectedAccount;
+        var accounts = SelectedAccounts;
+        Account? account = accounts.Count == 1 ? accounts[0] : null;
         RenameMenuItem.IsVisible = account is { HasNpssoToken: false };
         RefreshMenuItem.IsVisible = account is { HasNpssoToken: true };
-        e.Cancel = account is null;
+        DeleteMenuItem.Header = accounts.Count > 1 ? "Delete Accounts" : "Delete Account";
+        e.Cancel = accounts.Count == 0;
     }
+
+    private IReadOnlyList<Account> SelectedAccounts => AccountsGrid.SelectedItems.OfType<Account>().ToList();
 
     private Account? GetActionAccount(object? sender) => sender switch
     {
         Button { DataContext: Account account } => account,
-        MenuItem => _viewModel.SelectedAccount,
+        MenuItem => SelectedAccounts is { Count: 1 } accounts ? accounts[0] : null,
         _ => null
     };
 
@@ -161,14 +172,37 @@ public partial class AccountsView : UserControl
 
     private async void DeleteAccount_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (GetActionAccount(sender) is not { } account)
+        IReadOnlyList<Account> accounts = sender switch
+        {
+            Button { DataContext: Account account } => [account],
+            MenuItem => SelectedAccounts,
+            _ => []
+        };
+
+        if (accounts.Count == 0)
             return;
 
-        bool result = await _dialogs.ConfirmAsync("Remove account",
-            $"Are you sure you want to remove account '{account.OnlineId ?? account.AccountId}'? This will also remove all related entitlements.",
+        string message = accounts.Count == 1
+            ? $"Are you sure you want to remove account '{accounts[0].OnlineId ?? accounts[0].AccountId}'? This will also remove all related entitlements."
+            : $"Are you sure you want to remove these {accounts.Count} accounts?\n" +
+              string.Join("\n", accounts.Select(account => $"  • {account.OnlineId ?? account.AccountId}")) +
+              "\n\nThis will also remove all related entitlements.";
+
+        bool result = await _dialogs.ConfirmAsync(accounts.Count == 1 ? "Remove account" : "Remove accounts", message,
             owner: TopLevel.GetTopLevel(this) as Window);
 
-        if (result)
-            _viewModel.DeleteAccount(account);
+        if (!result)
+            return;
+
+        try
+        {
+            _viewModel.DeleteAccounts(accounts);
+        }
+        catch (Exception exception)
+        {
+            await _dialogs.ShowErrorAsync("Remove accounts failed",
+                "Deletion stopped. Some accounts may already have been removed; any remaining accounts have been kept.\n\n" +
+                exception.Message, owner: TopLevel.GetTopLevel(this) as Window);
+        }
     }
 }

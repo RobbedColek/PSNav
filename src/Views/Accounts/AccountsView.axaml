@@ -100,6 +100,7 @@
             <controls:RowActionDataGrid x:Name="AccountsGrid"
                                        ItemsSource="{Binding Accounts}"
                                        SelectedItem="{Binding SelectedAccount}"
+                                       SelectionMode="Extended"
                                        AutoGenerateColumns="False"
                                        IsReadOnly="True"
                                        GridLinesVisibility="Horizontal"
@@ -117,7 +118,8 @@
                         <MenuItem x:Name="RefreshMenuItem"
                                   Header="Refresh NPSSO Token"
                                   Click="RefreshAccount_Click" />
-                        <MenuItem Header="Delete Account"
+                        <MenuItem x:Name="DeleteMenuItem"
+                                  Header="Delete Account"
                                   Click="DeleteAccount_Click" />
                     </ContextMenu>
                 </DataGrid.ContextMenu>

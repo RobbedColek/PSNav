@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -76,12 +77,31 @@ public sealed partial class AccountsViewModel(IAccountsRepository accountReposit
     }
 
     [RelayCommand]
-    public void DeleteAccount(Account account)
-    {
-        accountRepository.Delete(account.AccountId);
+    public void DeleteAccount(Account account) => DeleteAccounts([account]);
 
-        RefreshAccounts();
-        WeakReferenceMessenger.Default.Send(new AccountDeletedMessage());
+    public void DeleteAccounts(IReadOnlyList<Account> accounts)
+    {
+        if (accounts.Count == 0)
+            return;
+
+        bool accountsDeleted = false;
+
+        try
+        {
+            foreach (Account account in accounts)
+            {
+                accountRepository.Delete(account.AccountId);
+                accountsDeleted = true;
+            }
+        }
+        finally
+        {
+            if (accountsDeleted)
+            {
+                RefreshAccounts();
+                WeakReferenceMessenger.Default.Send(new AccountDeletedMessage());
+            }
+        }
     }
 
     [RelayCommand]
