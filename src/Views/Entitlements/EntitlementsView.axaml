@@ -111,7 +111,7 @@
                             </ListBox>
                         </Flyout>
                     </Button.Flyout>
-                    <colek:Codicon Data="{StaticResource Phosphor.Columns}" Width="20" Height="20" Stretch="Uniform" />
+                    <colek:Codicon Data="{StaticResource Codicon.EyeClosed}" Width="20" Height="20" Stretch="Uniform" />
                 </Button>
                 <Button Grid.Column="3"
                         MinWidth="36"
