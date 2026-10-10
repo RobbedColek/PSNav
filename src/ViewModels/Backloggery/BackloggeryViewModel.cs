@@ -24,7 +24,7 @@ public sealed partial class BackloggeryViewModel : ViewModelBase
 
     private readonly IBackloggerySyncService _syncService;
     private readonly ISettingsRepository _settingsRepository;
-    private readonly bool _settingsLoaded;
+    private bool _settingsLoaded;
     private BackloggerySyncData? _data;
     private CancellationTokenSource? _applyCancellation;
     private bool _sessionChecked;
@@ -65,6 +65,8 @@ public sealed partial class BackloggeryViewModel : ViewModelBase
 
     public bool HasSession => _syncService.Session is not null;
 
+    public bool CanUnlink => HasSession && !IsBusy;
+
     public bool ShowLogin => !HasSession || (_sessionChecked && !IsSessionValid);
 
     [ObservableProperty]
@@ -100,6 +102,7 @@ public sealed partial class BackloggeryViewModel : ViewModelBase
     // Progress
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanUnlink))]
     [NotifyCanExecuteChangedFor(nameof(LoginCommand), nameof(LoginWithTokenCommand), nameof(AnalyzeCommand),
         nameof(ApplyCommand), nameof(SelectAllCommand), nameof(UnselectAllCommand), nameof(SelectUnmatchedCommand),
         nameof(UnselectUnmatchedCommand), nameof(EditCommand), nameof(SaveEditCommand))]
@@ -278,6 +281,7 @@ public sealed partial class BackloggeryViewModel : ViewModelBase
             _sessionChecked = true;
             IsSessionValid = true;
             OnPropertyChanged(nameof(HasSession));
+            OnPropertyChanged(nameof(CanUnlink));
             OnPropertyChanged(nameof(SessionText));
             OnPropertyChanged(nameof(ShowLogin));
         }
@@ -289,6 +293,49 @@ public sealed partial class BackloggeryViewModel : ViewModelBase
         {
             IsBusy = false;
             Status = string.Empty;
+        }
+    }
+
+    public void Unlink()
+    {
+        if (!CanUnlink)
+            return;
+
+        IsBusy = true;
+
+        try
+        {
+            _syncService.Unlink();
+            ClearPlan();
+            Username = string.Empty;
+            Password = string.Empty;
+            LogToken = string.Empty;
+            LoginError = null;
+            _sessionChecked = false;
+            IsSessionValid = false;
+            Status = string.Empty;
+            Progress = 0;
+
+            _settingsLoaded = false;
+            try
+            {
+                CrossPlatformMode = BackloggeryCrossPlatformMode.Both;
+                UseStealthSave = true;
+                DefaultPriority = BackloggeryPriority.Normal;
+                DefaultStatus = BackloggeryGameStatus.Unplayed;
+            }
+            finally
+            {
+                _settingsLoaded = true;
+            }
+
+            OnPropertyChanged(nameof(HasSession));
+            OnPropertyChanged(nameof(SessionText));
+            OnPropertyChanged(nameof(ShowLogin));
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

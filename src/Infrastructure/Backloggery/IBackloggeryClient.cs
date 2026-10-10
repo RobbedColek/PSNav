@@ -9,6 +9,8 @@ public interface IBackloggeryClient
 {
     void SetLogToken(string logToken);
 
+    void ClearSession();
+
     Task<BackloggerySession> LoginAsync(string username, string password, CancellationToken cancellationToken = default);
 
     Task<BackloggeryUser?> GetCurrentUserAsync(CancellationToken cancellationToken = default);

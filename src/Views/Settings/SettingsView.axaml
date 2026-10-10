@@ -107,6 +107,22 @@
                                 <TextBlock Classes="description"
                                            Text="Use Backloggery's Stealth Save when adding games." />
                             </StackPanel>
+
+                            <StackPanel Spacing="8" Margin="0,6,0,0">
+                                <TextBlock Text="{Binding Backloggery.Username, StringFormat='Linked account: {0}'}"
+                                           Foreground="White"
+                                           TextWrapping="Wrap"
+                                           IsVisible="{Binding Backloggery.HasSession}" />
+                                <TextBlock Classes="description"
+                                           Text="No Backloggery account is linked."
+                                           IsVisible="{Binding !Backloggery.HasSession}" />
+                                <TextBlock Classes="description"
+                                           Text="Unlinking removes all locally stored Backloggery data, including your saved login, sync history, ignored games and Backloggery preferences. Nothing on Backloggery's servers will be modified." />
+                                <Button Content="Unlink Backloggery account"
+                                        Click="UnlinkBackloggery_Click"
+                                        IsEnabled="{Binding Backloggery.CanUnlink}"
+                                        HorizontalAlignment="Left" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </StackPanel>

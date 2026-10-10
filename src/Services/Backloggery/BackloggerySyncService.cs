@@ -84,6 +84,13 @@ public sealed class BackloggerySyncService : IBackloggerySyncService
         return user?.UserId == Session.UserId;
     }
 
+    public void Unlink()
+    {
+        _syncRepository.ClearAccountData();
+        _client.ClearSession();
+        Session = null;
+    }
+
     public async Task<BackloggerySyncData> FetchDataAsync(CancellationToken cancellationToken = default)
     {
         BackloggerySession session = Session ?? throw new BackloggerySessionExpiredException();

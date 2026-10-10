@@ -83,6 +83,23 @@ public sealed class BackloggerySyncRepository(IDatabaseService databaseService) 
         transaction.Commit();
     }
 
+    public void ClearAccountData()
+    {
+        SqliteConnection connection = databaseService.GetConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction();
+
+        using SqliteCommand command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText =
+            """
+            DELETE FROM BackloggerySync;
+            DELETE FROM Settings WHERE Key GLOB 'Backloggery:*';
+            """;
+        command.ExecuteNonQuery();
+
+        transaction.Commit();
+    }
+
     public void Remove(IEnumerable<string> entitlementIds)
     {
         SqliteConnection connection = databaseService.GetConnection();

@@ -18,6 +18,8 @@ public interface IBackloggerySyncService
 
     Task<bool> ValidateSessionAsync();
 
+    void Unlink();
+
     Task<BackloggerySyncData> FetchDataAsync(CancellationToken cancellationToken = default);
 
     IReadOnlyList<BackloggerySyncItem> BuildPlan(BackloggerySyncData data, BackloggeryCrossPlatformMode mode);

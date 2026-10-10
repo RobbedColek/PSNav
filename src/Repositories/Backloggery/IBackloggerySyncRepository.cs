@@ -11,4 +11,6 @@ public interface IBackloggerySyncRepository
         string? platform);
 
     void Remove(IEnumerable<string> entitlementIds);
+
+    void ClearAccountData();
 }

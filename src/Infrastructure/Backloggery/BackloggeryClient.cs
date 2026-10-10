@@ -39,6 +39,12 @@ public sealed class BackloggeryClient : IBackloggeryClient
         _cookies.Add(new Cookie(LogTokenCookieName, logToken, "/", ".backloggery.com") { Secure = true, HttpOnly = true });
     }
 
+    public void ClearSession()
+    {
+        foreach (Cookie cookie in _cookies.GetAllCookies())
+            cookie.Expired = true;
+    }
+
     public async Task<BackloggerySession> LoginAsync(string username, string password,
         CancellationToken cancellationToken = default)
     {
