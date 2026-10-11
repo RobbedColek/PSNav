@@ -48,8 +48,14 @@
         <Grid RowDefinitions="Auto,*"
               RowSpacing="16"
               Classes.Blurred="{Binding IsImageOverlayVisible}">
-            <Grid Grid.Row="0"
-                  ColumnDefinitions="*,Auto,Auto,Auto">
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1000*" MaxWidth="460" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0"
                             Spacing="4">
                     <TextBlock Text="Entitlements"
@@ -58,9 +64,9 @@
                                Foreground="White" />
                 </StackPanel>
 
-                <TextBox Grid.Column="1"
-                         Width="448"
+                <TextBox Grid.Column="2"
                          Height="36"
+                         Margin="12,0,0,0"
                          VerticalAlignment="Center"
                          PlaceholderText="Search..."
                          Text="{Binding SearchText}">
@@ -91,7 +97,7 @@
                         </Button>
                     </TextBox.InnerRightContent>
                 </TextBox>
-                <Button Grid.Column="2"
+                <Button Grid.Column="3"
                         MinWidth="36"
                         Height="36"
                         Padding="0"
@@ -113,7 +119,7 @@
                     </Button.Flyout>
                     <colek:Codicon Data="{StaticResource Codicon.EyeClosed}" Width="20" Height="20" Stretch="Uniform" />
                 </Button>
-                <Button Grid.Column="3"
+                <Button Grid.Column="4"
                         MinWidth="36"
                         Height="36"
                         Padding="0"
