@@ -297,6 +297,9 @@ public sealed partial class ConsolesViewModel : ViewModelBase
                 try
                 {
                     RefreshConsoles();
+
+                    if (failure is null && newConsole?.Id is int registeredId)
+                        SelectedConsole = Consoles.FirstOrDefault(console => console.Id == registeredId);
                 }
                 catch (Exception refreshException) when (failure is not null)
                 {
