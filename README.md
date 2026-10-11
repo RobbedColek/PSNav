@@ -13,6 +13,8 @@
 - **Entitlements** - synchronize and browse games purchased on your accounts. Never buy the same game twice again!
 - **Consoles** - import an entitlement database from your PS4/PS5 to get more detailed data about your purchases (e.g. DLCs, manifest URLs, expired entitlements, expiration dates, retention policies, membership).
 - **Patches** - collect patch manifest URLs for the entitlements and submit the ones not yet sent to [prosperopatches.com](https://prosperopatches.com).
+- **Synchronize with Backloggery** - easily add your digital games to the library to keep track of your gaming backlog.
+- **Cross-platform** - works on Windows, Linux and macOS (Apple Silicon/Intel).
 
 ### Entitlement data sources and limitations
 
@@ -95,13 +97,35 @@ Use a console row's `Synchronize` button and choose `Synchronize automatically v
 
 To update an existing console from an exported file, choose `Synchronize manually via file`.
 
+### Synchronization with Backloggery
+
+<div align="center">
+    <img src="./res/Screenshot-Backloggery.png" alt="Synchronize with Backloggery">
+</div>
+
+PSNav can add your PS4/PS5 digital games to your [Backloggery](https://backloggery.com) library.
+
+Only full games are included; DLCs, PS4 to PS5 upgrades, trials and PlayStation Plus games are skipped.
+
+1. Go to the `Synchronize with Backloggery` view by clicking the cloud icon in the left sidebar.
+2. Log in with your Backloggery username and password or paste the `log_token` cookie from your browser.
+    - Your password is used only to log in and is not saved. PSNav stores the session token.
+3. Click the search button to fetch your Backloggery library and compare it with your entitlements.
+    - Games not found on Backloggery are checked automatically.
+    - Games that may already be there (e.g. a physical copy, another platform or edition) are marked for manual review.
+4. Use the checklist icon to change the selection or right-click games to ignore them in future synchronizations.
+5. Click the pencil button to change a game's title, priority, status or Stealth Save before it is added.
+6. Click the upload button to add the selected games to Backloggery.
+
+Default priority, status, Stealth Save and how to handle games owned on both PS4 and PS5 can be changed in `Settings`, where you can also unlink your Backloggery account.
+
 ## Your data
 
 Everything is stored locally in a SQLite database named `PSNav.db` inside the `PSNav` folder of your application data directory (`%APPDATA%\PSNav` on Windows).
 
 Images for your entitlements are downloaded and stored in the database during synchronization, for a smoother browsing experience at the cost of a larger database and a slower first synchronization.
 
-Account NPSSO tokens are stored in that database as plain text, so keep the file private and don't share it.
+Account NPSSO tokens and Backloggery cookies are stored in that database as plain text, so keep the file private and don't share it.
 
 ## Building from source
 
