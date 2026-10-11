@@ -7,7 +7,7 @@ public sealed partial class ConsoleProfile : ViewModels.ViewModelBase
 {
     [ObservableProperty] public partial string? AccountId { get; set; }
     [ObservableProperty] public partial string? OnlineId { get; set; }
-    public int? Id { get; set; }
+    public required int Id { get; init; }
     public int ConsoleId { get; init; }
     public required string Name { get; set; }
 

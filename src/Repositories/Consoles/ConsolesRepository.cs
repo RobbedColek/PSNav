@@ -559,7 +559,7 @@ public sealed class ConsolesRepository(
                 AccountID = @accountId,
                 UpdatedAt = unixepoch();
             """;
-        command.Parameters.AddWithValue("@id", profile.Id.Value);
+        command.Parameters.AddWithValue("@id", profile.Id);
         command.Parameters.AddWithValue("@consoleId", profile.ConsoleId);
         command.Parameters.AddWithValue("@name", profile.Name);
         command.Parameters.AddWithValue("@accountId", ToDbValue(profile.AccountId));
