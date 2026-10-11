@@ -69,10 +69,9 @@
                          Foreground="#FF0078D4" />
         </StackPanel>
 
-        <Grid Grid.Row="2" ColumnDefinitions="*,4*">
-            <Grid.IsVisible>
-                <Binding Path="IsUpdating" Converter="{x:Static BoolConverters.Not}" />
-            </Grid.IsVisible>
+        <Grid Grid.Row="2"
+              ColumnDefinitions="*,4*"
+              IsEnabled="{Binding !IsUpdating}">
             <Border Grid.Column="0"
                     Background="#FF101010"
                     BorderBrush="#FF242424"
