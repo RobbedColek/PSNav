@@ -62,14 +62,32 @@ The nightly build is regenerated automatically from the latest commit and may be
 
 ### Consoles
 
+#### Manually via file
+
 1. Go to the `Consoles` view by clicking the gamepad icon in the left sidebar.
-2. Click the `+` button in the top-right corner of the window.
+2. Click the `+` button in the top-right corner of the window and choose `Register manually via file`.
 3. Enter a name for the console and the path to its `entitlement.db` or `entitlement4.db` file.
     - On a jailbroken console, the file can be found at `/system_data/priv/license`.
 4. Click `Register`.
 5. Once the console is registered, select it from the list.
 6. Select one of the profiles in the profile list.
 7. Click the field under the `Account ID` column to link the profile to an account.
+
+#### Automatically via FTP
+
+1. Go to the `Consoles` view by clicking the gamepad icon in the left sidebar.
+2. Click the `+` button in the top-right corner of the window and choose `Register automatically via FTP`.
+3. Enter a name for the console, its IP address and the port of its FTP server.
+    - On a jailbroken console, start an FTP server (this is usually provided by your HEN).
+4. Click `Register`.
+5. Once the console is registered, select it from the list.
+6. Select one of the profiles in the profile list.
+7. Click the field under the `Account ID` column to link the profile to an account.
+
+#### Synchronizing
+
+Use a console row's `Synchronize` button and choose `Synchronize automatically via FTP` to refresh it.
+To update an existing console from an exported file, choose `Synchronize manually via file`.
 
 ## Your data
 

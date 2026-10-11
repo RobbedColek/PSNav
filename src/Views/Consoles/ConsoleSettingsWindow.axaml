@@ -1,0 +1,59 @@
+<colek:DialogWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:colek="https://github.com/RobbedColek/ColekUI"
+                    mc:Ignorable="d"
+                    d:DesignWidth="500"
+                    d:DesignHeight="350"
+                    x:Class="PSNav.Views.Consoles.ConsoleSettingsWindow"
+                    Title="Register Console"
+                    Header="Register Console"
+                    Description="Enter a name and the console's FTP connection settings."
+                    Width="500"
+                    MinWidth="500">
+
+    <StackPanel Spacing="12">
+        <StackPanel Spacing="4">
+            <TextBlock Text="Console Name"
+                       FontSize="12"
+                       Foreground="#FF9A9A9A" />
+            <TextBox x:Name="ConsoleNameTextBox"
+                     PlaceholderText="e.g. My PS4 Pro" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="IP Address"
+                       FontSize="12"
+                       Foreground="#FF9A9A9A" />
+            <TextBox x:Name="IpAddressTextBox"
+                     PlaceholderText="e.g. 192.168.1.100" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="FTP Port"
+                       FontSize="12"
+                       Foreground="#FF9A9A9A" />
+            <TextBox x:Name="FtpPortTextBox"
+                     Text="2121" />
+        </StackPanel>
+
+        <TextBlock x:Name="ErrorTextBlock"
+                   Foreground="#FFFF6B6B"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   IsVisible="False" />
+    </StackPanel>
+
+    <colek:DialogWindow.Buttons>
+        <Button x:Name="SubmitButton"
+                MinWidth="110"
+                Content="Register"
+                IsDefault="True"
+                Click="Submit_Click" />
+        <Button MinWidth="90"
+                Content="Cancel"
+                IsCancel="True"
+                Click="Cancel_Click" />
+    </colek:DialogWindow.Buttons>
+</colek:DialogWindow>

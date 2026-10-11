@@ -22,7 +22,7 @@ public sealed class ConsolesRepository(
         var consoles = new List<ConsoleModel>();
         SqliteConnection connection = databaseService.GetConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt FROM Consoles ORDER BY Name";
+        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt, IpAddress, FtpPort FROM Consoles ORDER BY Name COLLATE NOCASE";
 
         using SqliteDataReader reader = command.ExecuteReader();
         while (reader.Read())
@@ -37,7 +37,7 @@ public sealed class ConsolesRepository(
     {
         SqliteConnection connection = databaseService.GetConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt FROM Consoles WHERE ConsoleID = @id";
+        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt, IpAddress, FtpPort FROM Consoles WHERE ConsoleID = @id";
         command.Parameters.AddWithValue("@id", consoleId);
 
         using SqliteDataReader reader = command.ExecuteReader();
@@ -54,7 +54,7 @@ public sealed class ConsolesRepository(
             command.CommandText =
                 """
                 UPDATE Consoles 
-                SET Name = @name, UpdatedAt = unixepoch()
+                SET Name = @name, IpAddress = @ipAddress, FtpPort = @ftpPort, UpdatedAt = unixepoch()
                 WHERE ConsoleID = @id
                 """;
             command.Parameters.AddWithValue("@id", console.Id.Value);
@@ -63,22 +63,20 @@ public sealed class ConsolesRepository(
         {
             command.CommandText =
                 """
-                INSERT INTO Consoles (Name)
-                VALUES (@name)
+                INSERT INTO Consoles (Name, IpAddress, FtpPort)
+                VALUES (@name, @ipAddress, @ftpPort)
                 RETURNING ConsoleID;
                 """;
         }
 
         command.Parameters.AddWithValue("@name", console.Name);
+        command.Parameters.AddWithValue("@ipAddress", ToDbValue(console.IpAddress));
+        command.Parameters.AddWithValue("@ftpPort", console.FtpPort);
 
         if (console.Id.HasValue)
-        {
             command.ExecuteNonQuery();
-        }
         else
-        {
             console.Id = Convert.ToInt32(command.ExecuteScalar());
-        }
     }
 
     public void DeleteConsole(int consoleId)
@@ -100,9 +98,7 @@ public sealed class ConsolesRepository(
             using (SqliteDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
-                {
                     tablesToDrop.Add(reader.GetString(0));
-                }
             }
 
             foreach (var tableName in tablesToDrop)
@@ -135,7 +131,9 @@ public sealed class ConsolesRepository(
                 using SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    sourceTables.Add(reader.GetString(0));
+                    var tableName = reader.GetString(0);
+                    if (int.TryParse(tableName.Replace("entitlement_", ""), out _))
+                        sourceTables.Add(tableName);
                 }
             }
 
@@ -171,7 +169,10 @@ public sealed class ConsolesRepository(
         ImportEntitlements(consoleId, entitlementsFilePath);
 
         SqliteConnection connection = databaseService.GetConnection();
-        await using (SqliteCommand attachCommand = connection.CreateCommand())
+        var profileIds = new List<int>();
+        var entitlementsWithImages = new HashSet<string>();
+        var preparedProfiles = new List<(int ProfileId, List<dynamic> Entitlements)>();
+        using (SqliteCommand attachCommand = connection.CreateCommand())
         {
             attachCommand.CommandText = "ATTACH DATABASE @filePath AS sourceDb";
             attachCommand.Parameters.AddWithValue("@filePath", entitlementsFilePath);
@@ -180,73 +181,43 @@ public sealed class ConsolesRepository(
 
         try
         {
-            var profileIds = new List<int>();
-            await using (SqliteCommand command = connection.CreateCommand())
+            using (SqliteCommand command = connection.CreateCommand())
             {
                 command.CommandText =
                     "SELECT name FROM sourceDb.sqlite_master WHERE type='table' AND name LIKE 'entitlement_%'";
-                await using SqliteDataReader reader = await command.ExecuteReaderAsync();
+                using SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
                     var tableName = reader.GetString(0);
                     var idStr = tableName.Replace("entitlement_", "");
                     if (int.TryParse(idStr, out int id))
-                    {
                         profileIds.Add(id);
-                    }
                 }
             }
 
             // Get IDs of entitlements that already have an image
-            var entitlementsWithImages = new HashSet<string>();
-            await using (SqliteCommand command = connection.CreateCommand())
+            using (SqliteCommand command = connection.CreateCommand())
             {
                 command.CommandText = "SELECT EntitlementID FROM Entitlements WHERE Image IS NOT NULL";
-                await using SqliteDataReader reader = await command.ExecuteReaderAsync();
+                using SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
-                {
                     entitlementsWithImages.Add(reader.GetString(0));
-                }
             }
-
-            await using SqliteTransaction transaction = connection.BeginTransaction();
 
             for (int i = 0; i < profileIds.Count; i++)
             {
                 var profileId = profileIds[i];
-                var profilePrefix = profileIds.Count > 1 ? $"[{i + 1}/{profileIds.Count}] " : string.Empty;
-                progress?.Report(new ProgressReport($"{profilePrefix}Updating Profile {profileId}...",
-                    (double)i / profileIds.Count * 100));
-
-                await using (SqliteCommand command = connection.CreateCommand())
-                {
-                    command.Transaction = transaction;
-                    command.CommandText =
-                        """
-                        INSERT INTO ConsoleProfiles (ProfileID, ConsoleID, Name)
-                        SELECT @id, @consoleId, @name
-                        WHERE NOT EXISTS (SELECT 1 FROM ConsoleProfiles WHERE ProfileID = @id)
-                        """;
-                    command.Parameters.AddWithValue("@id", profileId);
-                    command.Parameters.AddWithValue("@consoleId", consoleId);
-                    command.Parameters.AddWithValue("@name", $"Profile {profileId}");
-                    command.ExecuteNonQuery();
-                }
-
                 var targetTable = $"console_{consoleId}_entitlement_{profileId:D10}";
                 var entitlementsToUpdate = new List<(string EntitlementId, string Json)>();
-                await using (SqliteCommand commandSelect = connection.CreateCommand())
+                using (SqliteCommand commandSelect = connection.CreateCommand())
                 {
-                    commandSelect.Transaction = transaction;
                     commandSelect.CommandText = $"SELECT Entitlement_id, JSON FROM {targetTable}";
-                    await using SqliteDataReader reader = await commandSelect.ExecuteReaderAsync();
+                    using SqliteDataReader reader = commandSelect.ExecuteReader();
                     while (reader.Read())
                     {
                         entitlementsToUpdate.Add((reader.GetString(0), reader.GetString(1)));
                     }
                 }
-
-                SemaphoreSlim semaphore = new(10); // Limit concurrent downloads
 
                 var processedEntitlements = new List<dynamic>();
 
@@ -315,24 +286,6 @@ public sealed class ConsolesRepository(
                             : null;
                     }
 
-                    Task<byte[]?> downloadTask = Task.FromResult<byte[]?>(null);
-                    if (!string.IsNullOrWhiteSpace(imageUrl) && !entitlementsWithImages.Contains(entitlementId))
-                    {
-                        var capturedUrl = imageUrl;
-                        downloadTask = Task.Run(async () =>
-                        {
-                            await semaphore.WaitAsync();
-                            try
-                            {
-                                return await apiClient.DownloadImageOrNullAsync(capturedUrl);
-                            }
-                            finally
-                            {
-                                semaphore.Release();
-                            }
-                        });
-                    }
-
                     string? productId = TryGetAny(root, out JsonElement prodIdElem, "product_id", "productId")
                         ? prodIdElem.GetString()
                         : null;
@@ -356,6 +309,11 @@ public sealed class ConsolesRepository(
                         TryGetAny(root, out JsonElement inactiveDateElement, "inactive_date", "inactiveDate")
                             ? DateTimeOffset.Parse(inactiveDateElement.GetString()!)
                             : null;
+                    DateTimeOffset? activeDate =
+                        TryGetAny(root, out JsonElement activeDateElement, "active_date", "activeDate") &&
+                        activeDateElement.ValueKind != JsonValueKind.Null
+                            ? DateTimeOffset.Parse(activeDateElement.GetString()!)
+                            : null;
 
                     processedEntitlements.Add(new
                     {
@@ -370,29 +328,110 @@ public sealed class ConsolesRepository(
                         FeatureType = featureType,
                         PackageType = packageType,
                         Type = type,
-                        DownloadTask = downloadTask,
                         ProductId = productId,
                         Membership = membership,
                         InactiveDate = inactiveDate,
+                        ActiveDate = activeDate,
                         RetentionPolicy = retentionPolicy,
                         Branding = branding
                     });
                 }
 
-                // Wait for all downloads and update DB in batches
-                for (int j = 0; j < processedEntitlements.Count; j++)
+                preparedProfiles.Add((profileId, processedEntitlements));
+            }
+        }
+        finally
+        {
+            using SqliteCommand detachCommand = connection.CreateCommand();
+            detachCommand.CommandText = "DETACH DATABASE sourceDb";
+            detachCommand.ExecuteNonQuery();
+        }
+
+        var processedProfiles = new List<(int ProfileId, List<(dynamic Entitlement, byte[]? Image)> Entitlements)>();
+        var imageDownloads = new Dictionary<string, Task<byte[]?>>();
+        using SemaphoreSlim semaphore = new(10);
+        try
+        {
+            foreach (var (profileId, entitlements) in preparedProfiles)
+            {
+                var downloads = new List<Task<byte[]?>>();
+                foreach (var ent in entitlements)
                 {
-                    var ent = processedEntitlements[j];
-                    if (j % 10 == 0 || j == processedEntitlements.Count - 1)
+                    string? imageUrl = ent.ImageUrl;
+                    string entitlementId = ent.EntitlementId;
+                    if (string.IsNullOrWhiteSpace(imageUrl) || entitlementsWithImages.Contains(entitlementId))
                     {
-                        progress?.Report(new ProgressReport(
-                            $"{profilePrefix}Processing entitlement {j + 1}/{processedEntitlements.Count}...",
-                            (i + (double)j / processedEntitlements.Count) / profileIds.Count * 100));
+                        downloads.Add(Task.FromResult<byte[]?>(null));
+                        continue;
                     }
 
-                    byte[]? image = await ent.DownloadTask;
+                    if (!imageDownloads.TryGetValue(entitlementId, out Task<byte[]?>? download))
+                    {
+                        download = Task.Run(async () =>
+                        {
+                            await semaphore.WaitAsync();
+                            try
+                            {
+                                return await apiClient.DownloadImageOrNullAsync(imageUrl);
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        });
+                        imageDownloads.Add(entitlementId, download);
+                    }
 
-                    await using (SqliteCommand commandUpsert = connection.CreateCommand())
+                    downloads.Add(download);
+                }
+
+                var processedEntitlements = new List<(dynamic Entitlement, byte[]? Image)>();
+                int i = processedProfiles.Count;
+                var profilePrefix = profileIds.Count > 1 ? $"[{i + 1}/{profileIds.Count}] " : string.Empty;
+                progress?.Report(new ProgressReport($"{profilePrefix}Updating Profile {profileId}...",
+                    (double)i / profileIds.Count * 100));
+                for (int j = 0; j < entitlements.Count; j++)
+                {
+                    if (j % 10 == 0 || j == entitlements.Count - 1)
+                    {
+                        progress?.Report(new ProgressReport(
+                            $"{profilePrefix}Processing entitlement {j + 1}/{entitlements.Count}...",
+                            (i + (double)j / entitlements.Count) / profileIds.Count * 100));
+                    }
+
+                    processedEntitlements.Add((entitlements[j], await downloads[j]));
+                }
+
+                processedProfiles.Add((profileId, processedEntitlements));
+            }
+        }
+        finally
+        {
+            await Task.WhenAll(imageDownloads.Values);
+        }
+
+        using (SqliteTransaction transaction = connection.BeginTransaction())
+        {
+            foreach (var (profileId, processedEntitlements) in processedProfiles)
+            {
+                using (SqliteCommand command = connection.CreateCommand())
+                {
+                    command.Transaction = transaction;
+                    command.CommandText =
+                        """
+                        INSERT INTO ConsoleProfiles (ProfileID, ConsoleID, Name)
+                        SELECT @id, @consoleId, @name
+                        WHERE NOT EXISTS (SELECT 1 FROM ConsoleProfiles WHERE ConsoleID = @consoleId AND ProfileID = @id)
+                        """;
+                    command.Parameters.AddWithValue("@id", profileId);
+                    command.Parameters.AddWithValue("@consoleId", consoleId);
+                    command.Parameters.AddWithValue("@name", $"Profile {profileId}");
+                    command.ExecuteNonQuery();
+                }
+
+                foreach (var (ent, image) in processedEntitlements)
+                {
+                    using (SqliteCommand commandUpsert = connection.CreateCommand())
                     {
                         commandUpsert.Transaction = transaction;
                         commandUpsert.CommandText =
@@ -428,21 +467,23 @@ public sealed class ConsolesRepository(
                     }
 
                     // Connect entitlements with profiles
-                    await using (SqliteCommand command = connection.CreateCommand())
+                    using (SqliteCommand command = connection.CreateCommand())
                     {
                         command.Transaction = transaction;
                         command.CommandText =
                             """
-                            INSERT INTO ProfileEntitlements (ProfileID, EntitlementID, ProductID, Membership, InactiveDate, RetentionPolicy, FeatureType, Branding)
-                            VALUES(@profileId, @entitlementId, @productId, @membership, @inactiveDate, @retentionPolicy, @featureType, @branding)
-                            ON CONFLICT(ProfileId, EntitlementId) DO UPDATE SET
+                            INSERT INTO ProfileEntitlements (ConsoleID, ProfileID, EntitlementID, ProductID, Membership, InactiveDate, ActiveDate, RetentionPolicy, FeatureType, Branding)
+                            VALUES(@consoleId, @profileId, @entitlementId, @productId, @membership, @inactiveDate, @activeDate, @retentionPolicy, @featureType, @branding)
+                            ON CONFLICT(ConsoleID, ProfileID, EntitlementID) DO UPDATE SET
                                 ProductID = @productId,
                                 Membership = @membership,
                                 InactiveDate = @inactiveDate,
+                                ActiveDate = @activeDate,
                                 RetentionPolicy = @retentionPolicy,
                                 FeatureType = @featureType,
                                 Branding = @branding;
                             """;
+                        command.Parameters.AddWithValue("@consoleId", consoleId);
                         command.Parameters.AddWithValue("@profileId", profileId);
                         command.Parameters.AddWithValue("@entitlementId", ent.EntitlementId);
                         command.Parameters.AddWithValue("@productId",
@@ -452,6 +493,10 @@ public sealed class ConsolesRepository(
                             ent.InactiveDate is null
                                 ? DBNull.Value
                                 : ((DateTimeOffset)ent.InactiveDate).ToUnixTimeSeconds());
+                        command.Parameters.AddWithValue("@activeDate",
+                            ent.ActiveDate is null
+                                ? DBNull.Value
+                                : ((DateTimeOffset)ent.ActiveDate).ToUnixTimeSeconds());
                         command.Parameters.AddWithValue("@retentionPolicy",
                             ent.RetentionPolicy is null ? DBNull.Value : ent.RetentionPolicy);
                         command.Parameters.AddWithValue("@featureType",
@@ -464,14 +509,9 @@ public sealed class ConsolesRepository(
             }
 
             transaction.Commit();
-            progress?.Report(new ProgressReport("Done.", 100));
         }
-        finally
-        {
-            await using SqliteCommand detachCommand = connection.CreateCommand();
-            detachCommand.CommandText = "DETACH DATABASE sourceDb";
-            detachCommand.ExecuteNonQuery();
-        }
+
+        progress?.Report(new ProgressReport("Done.", 100));
     }
 
     public IReadOnlyList<ConsoleProfile> GetProfilesForConsole(int consoleId)
@@ -489,7 +529,7 @@ public sealed class ConsolesRepository(
                 cp.CreatedAt, 
                 cp.UpdatedAt,
                 a.OnlineID,
-                (SELECT COUNT(*) FROM ProfileEntitlements pe WHERE pe.ProfileID = cp.ProfileID) AS EntitlementCount
+                (SELECT COUNT(*) FROM ProfileEntitlements pe WHERE pe.ConsoleID = cp.ConsoleID AND pe.ProfileID = cp.ProfileID) AS EntitlementCount
             FROM ConsoleProfiles cp
             LEFT JOIN Accounts a ON cp.AccountID = a.AccountID
             WHERE cp.ConsoleID = @id 
@@ -510,68 +550,28 @@ public sealed class ConsolesRepository(
     {
         SqliteConnection connection = databaseService.GetConnection();
         using SqliteCommand command = connection.CreateCommand();
-
-        bool exists = false;
-        if (profile.Id.HasValue)
-        {
-            using SqliteCommand checkCommand = connection.CreateCommand();
-            checkCommand.CommandText = "SELECT COUNT(*) FROM ConsoleProfiles WHERE ProfileID = @id";
-            checkCommand.Parameters.AddWithValue("@id", profile.Id.Value);
-            exists = Convert.ToInt32(checkCommand.ExecuteScalar()) > 0;
-        }
-
-        if (exists)
-        {
-            command.CommandText =
-                """
-                UPDATE ConsoleProfiles 
-                SET ConsoleID = @consoleId, Name = @name, AccountID = @accountId, UpdatedAt = unixepoch()
-                WHERE ProfileID = @id
-                """;
-            command.Parameters.AddWithValue("@id", profile.Id!.Value);
-        }
-        else
-        {
-            command.CommandText =
-                """
-                INSERT INTO ConsoleProfiles (ProfileID, ConsoleID, Name, AccountID)
-                VALUES (@id, @consoleId, @name, @accountId)
-                """;
-
-            if (profile.Id.HasValue)
-            {
-                command.Parameters.AddWithValue("@id", profile.Id.Value);
-            }
-            else
-            {
-                command.CommandText =
-                    """
-                    INSERT INTO ConsoleProfiles (ConsoleID, Name, AccountID)
-                    VALUES (@consoleId, @name, @accountId)
-                    RETURNING ProfileID;
-                    """;
-            }
-        }
-
+        command.CommandText =
+            """
+            INSERT INTO ConsoleProfiles (ProfileID, ConsoleID, Name, AccountID)
+            VALUES (@id, @consoleId, @name, @accountId)
+            ON CONFLICT(ConsoleID, ProfileID) DO UPDATE SET
+                Name = @name,
+                AccountID = @accountId,
+                UpdatedAt = unixepoch();
+            """;
+        command.Parameters.AddWithValue("@id", profile.Id.Value);
         command.Parameters.AddWithValue("@consoleId", profile.ConsoleId);
         command.Parameters.AddWithValue("@name", profile.Name);
         command.Parameters.AddWithValue("@accountId", ToDbValue(profile.AccountId));
-
-        if (exists || profile.Id.HasValue)
-        {
-            command.ExecuteNonQuery();
-        }
-        else
-        {
-            profile.Id = Convert.ToInt32(command.ExecuteScalar());
-        }
+        command.ExecuteNonQuery();
     }
 
-    public void DeleteProfile(int profileId)
+    public void DeleteProfile(int consoleId, int profileId)
     {
         SqliteConnection connection = databaseService.GetConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM ConsoleProfiles WHERE ProfileID = @id";
+        command.CommandText = "DELETE FROM ConsoleProfiles WHERE ConsoleID = @consoleId AND ProfileID = @id";
+        command.Parameters.AddWithValue("@consoleId", consoleId);
         command.Parameters.AddWithValue("@id", profileId);
         command.ExecuteNonQuery();
     }
@@ -580,12 +580,8 @@ public sealed class ConsolesRepository(
     private static bool TryGetAny(JsonElement element, out JsonElement value, params string[] names)
     {
         foreach (string name in names)
-        {
             if (element.TryGetProperty(name, out value))
-            {
                 return true;
-            }
-        }
 
         value = default;
         return false;
@@ -594,9 +590,7 @@ public sealed class ConsolesRepository(
     private static JsonElement GetRequired(JsonElement element, string entitlementId, params string[] names)
     {
         if (TryGetAny(element, out JsonElement value, names))
-        {
             return value;
-        }
 
         throw new InvalidDataException(
             $"Entitlement '{entitlementId}' is missing required property '{string.Join("' / '", names)}'.");
@@ -609,7 +603,9 @@ public sealed class ConsolesRepository(
             Id = reader.GetInt32(0),
             Name = reader.GetString(1),
             CreatedAt = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64(2)),
-            UpdatedAt = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64(3))
+            UpdatedAt = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64(3)),
+            IpAddress = reader.IsDBNull(4) ? null : reader.GetString(4),
+            FtpPort = reader.GetInt32(5)
         };
     }
 

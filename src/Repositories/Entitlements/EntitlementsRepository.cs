@@ -17,6 +17,16 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText =
             """
+            WITH RankedProfileEntitlements AS
+            (
+                SELECT pe.*, cp.AccountID,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY cp.AccountID, pe.EntitlementID
+                        ORDER BY pe.ActiveDate DESC, pe.ConsoleID, pe.ProfileID
+                    ) AS AssociationRank
+                FROM ProfileEntitlements pe
+                INNER JOIN ConsoleProfiles cp ON pe.ConsoleID = cp.ConsoleID AND pe.ProfileID = cp.ProfileID
+            )
             SELECT
                 e.EntitlementID,
                 e.TitleID,
@@ -38,10 +48,10 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
                 a.OnlineID,
                 pe.RetentionPolicy
             FROM Entitlements e
-            INNER JOIN ProfileEntitlements pe ON e.EntitlementID = pe.EntitlementID
-            INNER JOIN ConsoleProfiles cp ON pe.ProfileID = cp.ProfileID
-            INNER JOIN Accounts a ON cp.AccountID = a.AccountID
+            INNER JOIN RankedProfileEntitlements pe ON e.EntitlementID = pe.EntitlementID
+            INNER JOIN Accounts a ON pe.AccountID = a.AccountID
             LEFT JOIN EntitlementOverrides eo ON e.TitleID = eo.TitleID AND e.Type = eo.MatchType
+            WHERE pe.AssociationRank = 1
 
             UNION ALL
 
@@ -68,7 +78,7 @@ public sealed class EntitlementsRepository(IDatabaseService databaseService) : I
             WHERE NOT EXISTS (
                 SELECT 1
                 FROM ProfileEntitlements pe
-                INNER JOIN ConsoleProfiles cp ON pe.ProfileID = cp.ProfileID
+                INNER JOIN ConsoleProfiles cp ON pe.ConsoleID = cp.ConsoleID AND pe.ProfileID = cp.ProfileID
                 WHERE pe.EntitlementID = e.EntitlementID
                 AND cp.AccountID = a.AccountID)
             ORDER BY Name COLLATE NOCASE;

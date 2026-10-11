@@ -4,7 +4,7 @@ using System.IO;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using ColekUI.Controls;
-using Microsoft.Data.Sqlite;
+using PSNav.Services.Consoles;
 
 namespace PSNav.Views.Consoles;
 
@@ -23,11 +23,11 @@ public partial class RegisterConsoleWindow : DialogWindow
     {
         FilePickerOpenOptions options = new()
         {
-            Title = "Select entitlements.db",
+            Title = "Select entitlement.db / entitlement4.db",
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("SQLite Database")
+                new FilePickerFileType("Entitlements Database (entitlement.db / entitlement4.db)")
                 {
                     Patterns = ["*.db"]
                 }
@@ -36,9 +36,7 @@ public partial class RegisterConsoleWindow : DialogWindow
 
         var result = await StorageProvider.OpenFilePickerAsync(options);
         if (result.Count > 0)
-        {
             FilePathTextBox.Text = result[0].Path.LocalPath;
-        }
     }
 
     private void Cancel_Click(object? sender, RoutedEventArgs e)
@@ -61,51 +59,23 @@ public partial class RegisterConsoleWindow : DialogWindow
 
         if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
         {
-            ShowError("Please select a valid entitlements.db file.");
+            ShowError("Please select a valid entitlement.db / entitlement4.db file.");
             return;
         }
 
         try
         {
-            var profileIds = ExtractProfileIds(filePath);
-            if (profileIds.Count == 0)
-            {
-                ShowError("No profiles found in the entitlements database.");
-                return;
-            }
+            var profileIds = EntitlementDatabaseValidator.Validate(filePath);
 
             ConsoleName = name;
             EntitlementsFilePath = filePath;
-            ProfileIds = profileIds;
+            ProfileIds = new List<string>(profileIds);
             Close(true);
         }
         catch (Exception ex)
         {
-            ShowError($"Failed to parse entitlements.db: {ex.Message}");
+            ShowError($"Failed to validate entitlement.db / entitlement4.db: {ex.Message}");
         }
-    }
-
-    private List<string> ExtractProfileIds(string filePath)
-    {
-        var ids = new List<string>();
-        using SqliteConnection connection = new($"Data Source={filePath}");
-        connection.Open();
-
-        using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'entitlement_%'";
-
-        using SqliteDataReader reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            var tableName = reader.GetString(0);
-            var id = tableName.Replace("entitlement_", "");
-            if (!string.IsNullOrEmpty(id) && int.TryParse(id, out _))
-            {
-                ids.Add(id);
-            }
-        }
-
-        return ids;
     }
 
     private void ShowError(string message)

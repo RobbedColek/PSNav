@@ -9,7 +9,7 @@
                     x:Class="PSNav.Views.Consoles.RegisterConsoleWindow"
                     Title="Register Console"
                     Header="Register Console"
-                    Description="Enter a name and select the entitlements.db file."
+                    Description="Enter a name and select the entitlement.db / entitlement4.db file."
                     Width="500"
                     MinWidth="500">
 
@@ -29,8 +29,9 @@
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <TextBox x:Name="FilePathTextBox"
                          IsReadOnly="True"
-                         PlaceholderText="Select entitlements.db..." />
+                         PlaceholderText="Select entitlement.db / entitlement4.db..." />
                 <Button Grid.Column="1"
+                        MinWidth="90"
                         Content="Browse..."
                         Click="Browse_Click" />
             </Grid>

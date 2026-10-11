@@ -28,11 +28,22 @@
             </StackPanel>
 
             <Button Grid.Column="1"
+                    x:Name="AddConsoleButton"
                     MinWidth="36"
                     Height="36"
                     Padding="0"
                     VerticalAlignment="Center"
-                    Click="RegisterConsole_Click">
+                    IsEnabled="{Binding !IsUpdating}">
+                <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuItem Header="Register automatically via FTP"
+                                  IsEnabled="{Binding #AddConsoleButton.IsEnabled}"
+                                  Click="RegisterConsoleViaFtp_Click" />
+                        <MenuItem Header="Register manually via file"
+                                  IsEnabled="{Binding #AddConsoleButton.IsEnabled}"
+                                  Click="RegisterConsole_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
                 <colek:Codicon Data="{StaticResource Codicon.Add}"
                                Width="20"
                                Height="20"
@@ -50,6 +61,7 @@
                        Foreground="#FF9A9A9A"
                        FontSize="12" />
             <ProgressBar Value="{Binding UpdateProgress}"
+                         IsIndeterminate="{Binding IsUpdateIndeterminate}"
                          Minimum="0"
                          Maximum="100"
                          Height="4"
@@ -76,19 +88,46 @@
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" />
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                                    <Button Click="ImportEntitlements_Click"
-                                            ToolTip.Tip="Import entitlements.db"
+                                    <Button x:Name="SynchronizeButton"
+                                            ToolTip.Tip="Synchronize"
+                                            IsEnabled="{Binding !$parent[UserControl].((vm:ConsolesViewModel)DataContext).IsUpdating}"
                                             Background="Transparent"
                                             Padding="4"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
+                                        <Button.Flyout>
+                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                <MenuItem Header="Synchronize automatically via FTP"
+                                                          CommandParameter="{Binding #SynchronizeButton.DataContext}"
+                                                          IsEnabled="{Binding #SynchronizeButton.IsEnabled}"
+                                                          Click="ImportEntitlementsViaFtp_Click" />
+                                                <MenuItem Header="Synchronize manually via file"
+                                                          CommandParameter="{Binding #SynchronizeButton.DataContext}"
+                                                          IsEnabled="{Binding #SynchronizeButton.IsEnabled}"
+                                                          Click="ImportEntitlements_Click" />
+                                            </MenuFlyout>
+                                        </Button.Flyout>
                                         <colek:Codicon Data="{StaticResource Codicon.Refresh}"
                                                        Stretch="Uniform"
                                                        Width="14"
                                                        Height="14"
                                                        Foreground="#FF9A9A9A" />
                                     </Button>
+                                    <Button Click="EditConsole_Click"
+                                            ToolTip.Tip="Edit console"
+                                            IsEnabled="{Binding !$parent[UserControl].((vm:ConsolesViewModel)DataContext).IsUpdating}"
+                                            Background="Transparent"
+                                            Padding="4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <colek:Codicon Data="{StaticResource Codicon.Edit}"
+                                                       Stretch="Uniform"
+                                                       Width="14"
+                                                       Height="14"
+                                                       Foreground="#FF9A9A9A" />
+                                    </Button>
                                     <Button Click="DeleteConsole_Click"
+                                            IsEnabled="{Binding !$parent[UserControl].((vm:ConsolesViewModel)DataContext).IsUpdating}"
                                             ToolTip.Tip="Delete Console"
                                             Background="Transparent"
                                             Padding="4"
@@ -165,6 +204,7 @@
                                     <DataTemplate x:DataType="modelsConsoles:ConsoleProfile">
                                         <ComboBox
                                             ItemsSource="{Binding $parent[UserControl].((vm:ConsolesViewModel)DataContext)?.AvailableAccounts}"
+                                            IsEnabled="{Binding !$parent[UserControl].((vm:ConsolesViewModel)DataContext).IsUpdating}"
                                             HorizontalAlignment="Stretch"
                                             SelectionChanged="AccountComboBox_SelectionChanged">
                                             <ComboBox.SelectedItem>

@@ -29,6 +29,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+        <PackageReference Include="FluentFTP" Version="55.0.0"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7"/>
         <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4"/>
         <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" Version="3.119.4"/>
@@ -65,6 +66,10 @@
             <DependentUpon>RegisterConsoleWindow.axaml</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
+        <Compile Update="Views\Consoles\ConsoleSettingsWindow.axaml.cs">
+            <DependentUpon>ConsoleSettingsWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
         <Compile Update="Views\Shell\MainWindow.axaml.cs">
             <DependentUpon>MainWindow.axaml</DependentUpon>
             <SubType>Code</SubType>
@@ -94,6 +99,7 @@
         <AdditionalFiles Include="Views\Accounts\AddOfflineAccountWindow.axaml"/>
         <AdditionalFiles Include="Views\Consoles\ConsolesView.axaml"/>
         <AdditionalFiles Include="Views\Consoles\RegisterConsoleWindow.axaml"/>
+        <AdditionalFiles Include="Views\Consoles\ConsoleSettingsWindow.axaml"/>
         <AdditionalFiles Include="Views\Entitlements\EntitlementsView.axaml"/>
         <AdditionalFiles Include="Views\Shell\MainWindow.axaml"/>
         <AdditionalFiles Include="Views\Settings\SettingsView.axaml"/>

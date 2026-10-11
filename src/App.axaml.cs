@@ -16,6 +16,7 @@ using PSNav.Repositories.Patches;
 using PSNav.Repositories.Settings;
 using PSNav.Services.Accounts;
 using PSNav.Services.Backloggery;
+using PSNav.Services.Consoles;
 using PSNav.Services.Patches;
 using PSNav.ViewModels.Accounts;
 using PSNav.ViewModels.Backloggery;
@@ -57,6 +58,7 @@ public class App : Application
         services.AddSingleton<IAccountService, AccountService>();
         services.AddSingleton<IPatchService, PatchService>();
         services.AddSingleton<IBackloggerySyncService, BackloggerySyncService>();
+        services.AddSingleton<IConsoleFtpService, ConsoleFtpService>();
         services.AddSingleton<IDialogService, DialogService>();
 
         // Register ViewModels
@@ -72,9 +74,29 @@ public class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+            Exception? databaseError = null;
+            try
+            {
+                Services.GetRequiredService<IDatabaseService>();
+            }
+            catch (Exception exception)
+            {
+                databaseError = exception;
+            }
+
+            if (databaseError is null)
+                desktop.MainWindow = new MainWindow();
+            else
+                ShowStartupError(desktop, databaseError);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private async void ShowStartupError(IClassicDesktopStyleApplicationLifetime desktop, Exception exception)
+    {
+        await Services!.GetRequiredService<IDialogService>().ShowErrorAsync("Failed to open the database",
+            $"PSNav could not start because its database could not be opened. {exception.Message}");
+        desktop.Shutdown(1);
     }
 }
