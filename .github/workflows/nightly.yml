@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            7z a "${APP_NAME}-${{ matrix.rid }}.zip" "./publish/${{ matrix.rid }}/*"
+            7z a "${APP_NAME}-${{ matrix.rid }}.zip" "./publish/${{ matrix.rid }}/*.exe"
           else
             tar -czf "${APP_NAME}-${{ matrix.rid }}.tar.gz" -C "publish/${{ matrix.rid }}" .
           fi
