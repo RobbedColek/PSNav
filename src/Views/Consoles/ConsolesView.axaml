@@ -153,11 +153,11 @@
                     CornerRadius="12"
                     ClipToBounds="True"
                     Padding="0"
-                    Margin="8,0,0,0"
-                    IsVisible="{Binding SelectedConsole, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    Margin="8,0,0,0">
                 <Grid RowDefinitions="Auto,*">
                     <DataGrid Grid.Row="1"
                               ItemsSource="{Binding SelectedConsoleProfiles}"
+                              IsEnabled="{Binding SelectedConsole, Converter={x:Static ObjectConverters.IsNotNull}}"
                               AutoGenerateColumns="False"
                               IsReadOnly="False"
                               Background="Transparent">

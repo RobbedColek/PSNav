@@ -60,9 +60,11 @@ public sealed partial class ConsolesViewModel : ViewModelBase
     [RelayCommand]
     private void LoadConsoles()
     {
-        if (Consoles.Count > 0)
-            return;
-        RefreshConsoles();
+        if (Consoles.Count == 0)
+            RefreshConsoles();
+
+        if (!_operationActive)
+            SelectedConsole = Consoles.FirstOrDefault();
     }
 
     private void RefreshConsoles()
