@@ -126,7 +126,26 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Spacing="16" />
+                <StackPanel Grid.Column="1" Spacing="16">
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="cardTitle" Text="About" />
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="Created by Colek"
+                                           Foreground="White"
+                                           TextWrapping="Wrap" />
+                                <HyperlinkButton Content="https://github.com/RobbedColek/PSNav"
+                                                 NavigateUri="https://github.com/RobbedColek/PSNav"
+                                                 Padding="0"
+                                                 Foreground="#FF64B5F6" />
+                            </StackPanel>
+                            <Separator Background="#FF242424" />
+                            <TextBlock Text="{Binding Version, StringFormat='Version: {0}'}"
+                                       Foreground="White"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </Grid>
         </StackPanel>
     </ScrollViewer>
