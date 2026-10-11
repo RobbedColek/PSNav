@@ -2,16 +2,13 @@ name: Nightly Build
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '17 2 * * *'
+      timezone: 'Europe/Warsaw'
   workflow_dispatch:
 
 concurrency:
   group: nightly
   cancel-in-progress: true
-
-env:
-  PROJECT: src/PSNav.csproj
-  APP_NAME: PSNav
 
 jobs:
   check:
@@ -33,56 +30,9 @@ jobs:
   build:
     needs: check
     if: needs.check.outputs.changed == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            rid: win-x64
-          - os: ubuntu-latest
-            rid: linux-x64
-          - os: macos-latest
-            rid: osx-arm64
-          - os: macos-latest
-            rid: osx-x64
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.112'
-
-      - name: Publish
-        run: >
-          dotnet publish ${{ env.PROJECT }}
-          -c Release
-          -r ${{ matrix.rid }}
-          --self-contained true
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:EnableCompressionInSingleFile=true
-          -p:DebugType=none
-          -o publish/${{ matrix.rid }}
-
-      - name: Package
-        shell: bash
-        run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            7z a "${APP_NAME}-${{ matrix.rid }}.zip" "./publish/${{ matrix.rid }}/*.exe"
-          else
-            tar -czf "${APP_NAME}-${{ matrix.rid }}.tar.gz" -C "publish/${{ matrix.rid }}" .
-          fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.APP_NAME }}-${{ matrix.rid }}
-          path: ${{ env.APP_NAME }}-${{ matrix.rid }}.*
-          retention-days: 1
-          if-no-files-found: error
+    uses: ./.github/workflows/build.yml
+    with:
+      version: 0.0.0-nightly
 
   release:
     needs: build
