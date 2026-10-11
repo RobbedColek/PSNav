@@ -57,6 +57,16 @@ public sealed partial class ConsolesViewModel : ViewModelBase
 
     public ObservableCollection<ConsoleProfile> SelectedConsoleProfiles { get; } = [];
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUnlinkedProfiles), nameof(UnlinkedProfilesHint))]
+    private int _unlinkedProfileCount;
+
+    public bool HasUnlinkedProfiles => UnlinkedProfileCount > 0;
+
+    public string UnlinkedProfilesHint => UnlinkedProfileCount == 1
+        ? "1 profile isn't linked to an account, so its entitlements won't show in the Entitlements view. Pick an account in the Account ID column to link it."
+        : $"{UnlinkedProfileCount} profiles aren't linked to an account, so their entitlements won't show in the Entitlements view. Pick an account in the Account ID column to link them.";
+
     [RelayCommand]
     private void LoadConsoles()
     {
@@ -115,14 +125,21 @@ public sealed partial class ConsolesViewModel : ViewModelBase
 
         SelectedConsoleProfiles.Clear();
 
-        if (SelectedConsole?.Id == null)
-            return;
-
-        foreach (ConsoleProfile profile in _consolesRepository.GetProfilesForConsole(SelectedConsole.Id.Value))
+        if (SelectedConsole?.Id != null)
         {
-            profile.PropertyChanged += OnProfilePropertyChanged;
-            SelectedConsoleProfiles.Add(profile);
+            foreach (ConsoleProfile profile in _consolesRepository.GetProfilesForConsole(SelectedConsole.Id.Value))
+            {
+                profile.PropertyChanged += OnProfilePropertyChanged;
+                SelectedConsoleProfiles.Add(profile);
+            }
         }
+
+        UpdateUnlinkedProfileCount();
+    }
+
+    private void UpdateUnlinkedProfileCount()
+    {
+        UnlinkedProfileCount = SelectedConsoleProfiles.Count(profile => profile.AccountId == null);
     }
 
     public void DeleteConsole(ConsoleModel console)
@@ -377,10 +394,12 @@ public sealed partial class ConsolesViewModel : ViewModelBase
 
     private void OnProfilePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (!_operationActive && !_isRefreshing &&
-            e.PropertyName == nameof(ConsoleProfile.AccountId) && sender is ConsoleProfile profile)
-        {
+        if (e.PropertyName != nameof(ConsoleProfile.AccountId) || sender is not ConsoleProfile profile)
+            return;
+
+        if (!_operationActive && !_isRefreshing)
             UpdateProfileAccount(profile);
-        }
+
+        UpdateUnlinkedProfileCount();
     }
 }

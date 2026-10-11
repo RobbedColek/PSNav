@@ -35,13 +35,11 @@ public partial class ConsolesView : UserControl
 
     private void AccountComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (sender is not ComboBox { DataContext: ConsoleProfile profile } comboBox)
+        if (sender is not ComboBox { DataContext: ConsoleProfile profile, SelectedItem: Account selectedAccount })
             return;
 
-        Account? selectedAccount = comboBox.SelectedItem as Account;
-
-        if (profile.AccountId != selectedAccount?.AccountId)
-            profile.AccountId = selectedAccount?.AccountId;
+        if (profile.AccountId != selectedAccount.AccountId)
+            profile.AccountId = selectedAccount.AccountId;
     }
 
     private async void ImportEntitlements_Click(object? sender, RoutedEventArgs e)

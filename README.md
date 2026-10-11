@@ -70,8 +70,7 @@ The nightly build is regenerated automatically from the latest commit and may be
     - On a jailbroken console, the file can be found at `/system_data/priv/license`.
 4. Click `Register`.
 5. Once the console is registered, select it from the list.
-6. Select one of the profiles in the profile list.
-7. Click the field under the `Account ID` column to link the profile to an account.
+6. For each profile, pick an account from the `Link to account...` dropdown in the `Account ID` column. See [Linking profiles to accounts](#linking-profiles-to-accounts).
 
 #### Automatically via FTP
 
@@ -81,12 +80,19 @@ The nightly build is regenerated automatically from the latest commit and may be
     - On a jailbroken console, start an FTP server (this is usually provided by your HEN).
 4. Click `Register`.
 5. Once the console is registered, select it from the list.
-6. Select one of the profiles in the profile list.
-7. Click the field under the `Account ID` column to link the profile to an account.
+6. For each profile, pick an account from the `Link to account...` dropdown in the `Account ID` column. See [Linking profiles to accounts](#linking-profiles-to-accounts).
+
+#### Linking profiles to accounts
+
+Entitlements imported from a console are shown in the `Entitlements` view only for profiles linked to an account.
+
+- The account must exist first. Add it in the `Accounts` view, either with an NPSSO token or as an offline account.
+- Unlinked profiles are highlighted and a warning above the profile list shows how many profiles still need to be linked.
 
 #### Synchronizing
 
 Use a console row's `Synchronize` button and choose `Synchronize automatically via FTP` to refresh it.
+
 To update an existing console from an exported file, choose `Synchronize manually via file`.
 
 ## Your data
