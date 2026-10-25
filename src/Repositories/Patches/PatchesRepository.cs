@@ -25,7 +25,7 @@ public sealed class PatchesRepository(IDatabaseService databaseService) : IPatch
             FROM Entitlements e 
             LEFT JOIN PatchEntitlements p ON e.EntitlementID = p.EntitlementID
             WHERE e.ReferencePackageUrl IS NOT NULL
-            AND e.Type = 'PSGD'
+            AND e.Type IN ('PSGD', 'PSMEDIA')
             AND UPPER(e.Platform) = 'PS5'
             ORDER BY p.IsSent IS NOT NULL, e.Name COLLATE NOCASE;
             """;
@@ -58,7 +58,7 @@ public sealed class PatchesRepository(IDatabaseService databaseService) : IPatch
             FROM Entitlements e 
             LEFT JOIN PatchEntitlements p ON e.EntitlementID = p.EntitlementID
             WHERE e.ReferencePackageUrl IS NOT NULL
-            AND e.Type = 'PSGD'
+            AND e.Type IN ('PSGD', 'PSMEDIA')
             AND UPPER(e.Platform) = 'PS5'
             AND p.IsSent IS NULL
             ORDER BY e.Name COLLATE NOCASE;
