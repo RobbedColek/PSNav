@@ -39,6 +39,7 @@ Prebuilt, self-contained single-file builds are published on the [Releases](http
 |---|---|
 | Windows (x64) | `PSNav-win-x64.zip` |
 | Linux (x64) | `PSNav-linux-x64.tar.gz` |
+| Linux (ARM64) | `PSNav-linux-arm64.tar.gz` |
 | macOS (Apple Silicon) | `PSNav-osx-arm64.tar.gz` |
 | macOS (Intel) | `PSNav-osx-x64.tar.gz` |
 
@@ -145,7 +146,7 @@ To produce a single-file build for your platform:
 dotnet publish src/PSNav.csproj -c Release -r win-x64 --self-contained true -o publish
 ```
 
-Replace `win-x64` with `linux-x64`, `osx-arm64` or `osx-x64` as needed.
+Replace `win-x64` with `linux-x64`, `linux-arm64`, `osx-arm64` or `osx-x64` as needed.
 
 ## Disclaimer
 
