@@ -23,6 +23,19 @@
         </StackPanel>
 
         <StackPanel Spacing="4">
+            <TextBlock Text="Platform"
+                       FontSize="12"
+                       Foreground="#FF9A9A9A" />
+            <ComboBox x:Name="PlatformComboBox"
+                      HorizontalAlignment="Stretch"
+                      SelectedIndex="0">
+                <ComboBoxItem Content="Unknown (detect on import)" />
+                <ComboBoxItem Content="PS4" />
+                <ComboBoxItem Content="PS5" />
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
             <TextBlock Text="IP Address"
                        FontSize="12"
                        Foreground="#FF9A9A9A" />

@@ -181,6 +181,7 @@ public sealed partial class ConsolesViewModel : ViewModelBase
                 Name = validated.Name,
                 IpAddress = validated.IpAddress,
                 FtpPort = validated.FtpPort,
+                Platform = validated.Platform,
                 CreatedAt = console.CreatedAt,
                 UpdatedAt = console.UpdatedAt
             });
@@ -207,7 +208,7 @@ public sealed partial class ConsolesViewModel : ViewModelBase
             return Task.CompletedTask;
 
         int consoleId = console.Id.Value;
-        ConsoleSettings settings = new(console.Name, console.IpAddress, console.FtpPort);
+        ConsoleSettings settings = new(console.Name, console.IpAddress, console.FtpPort, console.Platform);
         return ImportConsoleAsync(consoleId, settings, null, true, false);
     }
 
@@ -224,6 +225,7 @@ public sealed partial class ConsolesViewModel : ViewModelBase
         Exception? failure = null;
         ConsoleSettings? validated = null;
         string? ftpPostDownloadStage = null;
+        string? databaseFileName = filePath;
 
         try
         {
@@ -234,7 +236,7 @@ public sealed partial class ConsolesViewModel : ViewModelBase
                 temporaryDirectory = Path.Combine(Path.GetTempPath(), $"PSNav-console-ftp-{Guid.NewGuid():N}");
                 Directory.CreateDirectory(temporaryDirectory);
                 filePath = Path.Combine(temporaryDirectory, "entitlements.db");
-                await _ftpService.DownloadDatabaseAsync(validated!.IpAddress!, validated.FtpPort, filePath,
+                databaseFileName = await _ftpService.DownloadDatabaseAsync(validated!.IpAddress!, validated.FtpPort, filePath,
                     StartStage("Connecting", true));
             }
 
@@ -258,7 +260,8 @@ public sealed partial class ConsolesViewModel : ViewModelBase
                 {
                     Name = validated!.Name,
                     IpAddress = validated.IpAddress,
-                    FtpPort = validated.FtpPort
+                    FtpPort = validated.FtpPort,
+                    Platform = validated.Platform
                 };
                 _consolesRepository.UpsertConsole(newConsole);
                 consoleId = newConsole.Id ?? throw new InvalidOperationException("The console could not be created.");
@@ -269,6 +272,9 @@ public sealed partial class ConsolesViewModel : ViewModelBase
 
             await _consolesRepository.UpdateEntitlements(consoleId.Value, filePath!,
                 StartStage("Importing entitlements...", false));
+
+            if (ConsolePlatform.FromDatabaseFileName(databaseFileName) is { } detectedPlatform)
+                _consolesRepository.SetPlatformIfUnknown(consoleId.Value, detectedPlatform);
         }
         catch (Exception exception)
         {

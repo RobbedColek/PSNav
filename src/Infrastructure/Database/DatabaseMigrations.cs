@@ -41,6 +41,7 @@ internal static class DatabaseMigrations
 
             DatabaseSchema.Create(connection, transaction);
             AddFtpColumns(connection, transaction);
+            AddPlatformColumn(connection, transaction);
             CheckForeignKeys(connection, transaction, "ConsoleProfiles");
             CheckForeignKeys(connection, transaction, "ProfileEntitlements");
             Execute(connection, transaction, $"PRAGMA user_version = {DatabaseSchema.CurrentVersion};");
@@ -101,6 +102,14 @@ internal static class DatabaseMigrations
         {
             Execute(connection, transaction,
                 "ALTER TABLE Consoles ADD COLUMN FtpPort INTEGER NOT NULL DEFAULT 2121 CHECK (FtpPort BETWEEN 1 AND 65535);");
+        }
+    }
+
+    private static void AddPlatformColumn(SqliteConnection connection, SqliteTransaction transaction)
+    {
+        if (!HasColumn(connection, transaction, "Consoles", "Platform"))
+        {
+            Execute(connection, transaction, "ALTER TABLE Consoles ADD COLUMN Platform TEXT NULL;");
         }
     }
 

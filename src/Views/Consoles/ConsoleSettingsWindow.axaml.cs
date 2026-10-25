@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using Avalonia.Interactivity;
 using ColekUI.Controls;
@@ -8,6 +9,8 @@ namespace PSNav.Views.Consoles;
 
 public partial class ConsoleSettingsWindow : DialogWindow
 {
+    private static readonly string?[] Platforms = [null, ConsolePlatform.Ps4, ConsolePlatform.Ps5];
+
     private readonly bool _requireIpAddress;
 
     public ConsoleSettingsWindow() : this("Register Console",
@@ -27,6 +30,7 @@ public partial class ConsoleSettingsWindow : DialogWindow
         ConsoleNameTextBox.Text = initialSettings.Name;
         IpAddressTextBox.Text = initialSettings.IpAddress;
         FtpPortTextBox.Text = initialSettings.FtpPort.ToString(CultureInfo.InvariantCulture);
+        PlatformComboBox.SelectedIndex = Math.Max(0, Array.IndexOf(Platforms, initialSettings.Platform));
         _requireIpAddress = requireIpAddress;
     }
 
@@ -38,8 +42,9 @@ public partial class ConsoleSettingsWindow : DialogWindow
     private void Submit_Click(object? sender, RoutedEventArgs e)
     {
         ErrorTextBlock.IsVisible = false;
+        string? platform = Platforms[Math.Max(0, PlatformComboBox.SelectedIndex)];
         if (!ConsoleSettingsValidator.TryValidate(ConsoleNameTextBox.Text, IpAddressTextBox.Text, FtpPortTextBox.Text,
-                _requireIpAddress, out ConsoleSettings? settings, out string error))
+                platform, _requireIpAddress, out ConsoleSettings? settings, out string error))
         {
             ErrorTextBlock.Text = error;
             ErrorTextBlock.IsVisible = true;

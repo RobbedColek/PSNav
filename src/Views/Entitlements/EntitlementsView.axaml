@@ -404,99 +404,119 @@
                             BorderThickness="1,0,0,0"
                             Padding="12"
                             IsVisible="{Binding SelectedEntitlement, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <ScrollViewer>
-                            <StackPanel Spacing="8">
-                                <Border Width="128"
-                                        Height="128"
-                                        CornerRadius="8"
-                                        ClipToBounds="True"
-                                        Background="#FF242424"
-                                        HorizontalAlignment="Center"
-                                        Cursor="Hand"
-                                        PointerPressed="EntitlementImage_PointerPressed">
-                                    <Image
-                                        Source="{Binding SelectedEntitlement?.Image, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=128}"
-                                        Stretch="Uniform"
-                                        RenderOptions.BitmapInterpolationMode="HighQuality" />
-                                </Border>
+                        <Grid RowDefinitions="*,Auto">
+                            <ScrollViewer Grid.Row="0">
+                                <StackPanel Spacing="8">
+                                    <Border Width="128"
+                                            Height="128"
+                                            CornerRadius="8"
+                                            ClipToBounds="True"
+                                            Background="#FF242424"
+                                            HorizontalAlignment="Center"
+                                            Cursor="Hand"
+                                            PointerPressed="EntitlementImage_PointerPressed">
+                                        <Image
+                                            Source="{Binding SelectedEntitlement?.Image, Converter={StaticResource ByteArrayToBitmapConverter}, ConverterParameter=128}"
+                                            Stretch="Uniform"
+                                            RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                    </Border>
 
-                                <TextBlock Text="{Binding SelectedEntitlement?.Name}"
-                                           FontSize="18"
-                                           FontWeight="Bold"
-                                           TextWrapping="Wrap"
-                                           HorizontalAlignment="Center"
-                                           TextAlignment="Center" />
+                                    <TextBlock Text="{Binding SelectedEntitlement?.Name}"
+                                               FontSize="18"
+                                               FontWeight="Bold"
+                                               TextWrapping="Wrap"
+                                               HorizontalAlignment="Center"
+                                               TextAlignment="Center" />
 
-                                <TextBlock Text="Entitlement Expired"
-                                           FontSize="12"
-                                           Foreground="OrangeRed"
-                                           TextWrapping="Wrap"
-                                           HorizontalAlignment="Center"
-                                           TextAlignment="Center"
-                                           IsVisible="{Binding !SelectedEntitlement.IsActive}" />
+                                    <TextBlock Text="Entitlement Expired"
+                                               FontSize="12"
+                                               Foreground="OrangeRed"
+                                               TextWrapping="Wrap"
+                                               HorizontalAlignment="Center"
+                                               TextAlignment="Center"
+                                               IsVisible="{Binding !SelectedEntitlement.IsActive}" />
 
-                                <Separator Background="#FF242424" />
+                                    <Separator Background="#FF242424" />
 
-                                <Button HorizontalAlignment="Center"
-                                        Click="ShowAllForSelectedEntitlement_Click">
-                                    <TextBlock
-                                        Text="{Binding SelectedEntitlement?.TitleId, StringFormat='Show all for {0}'}" />
-                                </Button>
+                                    <Button HorizontalAlignment="Center"
+                                            Click="ShowAllForSelectedEntitlement_Click">
+                                        <TextBlock
+                                            Text="{Binding SelectedEntitlement?.TitleId, StringFormat='Show all for {0}'}" />
+                                    </Button>
 
-                                <Separator Background="#FF242424" />
+                                    <Separator Background="#FF242424" />
 
-                                <StackPanel>
-                                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto">
-                                        <TextBlock Grid.Row="0"
-                                                   Grid.Column="0"
-                                                   Text="Title ID:"
-                                                   Foreground="#FF9A9A9A"
-                                                   Margin="0,0,8,4" />
-                                        <TextBlock Grid.Row="0"
-                                                   Grid.Column="1"
-                                                   Text="{Binding SelectedEntitlement?.TitleId}"
-                                                   Cursor="Hand"
-                                                   PointerPressed="CopyToClipboard_PointerPressed" />
-                                        <TextBlock Grid.Row="2"
-                                                   Grid.Column="0"
-                                                   Text="Entitlement ID:"
-                                                   Foreground="#FF9A9A9A"
-                                                   Margin="0,0,8,4" />
-                                        <TextBlock Grid.Row="2"
-                                                   Grid.Column="1"
-                                                   Text="{Binding SelectedEntitlement?.EntitlementId}"
-                                                   TextWrapping="Wrap"
-                                                   FontSize="11"
-                                                   Cursor="Hand"
-                                                   PointerPressed="CopyToClipboard_PointerPressed" />
-                                        <TextBlock Grid.Row="4"
-                                                   Grid.Column="0"
-                                                   Text="Product ID:"
-                                                   Foreground="#FF9A9A9A"
-                                                   Margin="0,0,8,4" />
-                                        <TextBlock Grid.Row="4"
-                                                   Grid.Column="1"
-                                                   Text="{Binding SelectedEntitlement?.ProductId}"
-                                                   TextWrapping="Wrap"
-                                                   FontSize="11"
-                                                   Cursor="Hand"
-                                                   PointerPressed="CopyToClipboard_PointerPressed" />
-                                        <TextBlock Grid.Row="6" Grid.Column="0"
-                                                   Text="URL:"
-                                                   Foreground="#FF9A9A9A"
-                                                   Margin="0,0,8,4"
-                                                   IsVisible="{Binding SelectedEntitlement?.HasReferencePackageUrl}" />
-                                        <TextBlock Grid.Row="6" Grid.Column="1"
-                                                   Text="{Binding SelectedEntitlement?.ReferencePackageUrl, TargetNullValue='Missing'}"
-                                                   TextWrapping="Wrap"
-                                                   FontSize="11"
-                                                   IsVisible="{Binding SelectedEntitlement?.HasReferencePackageUrl}"
-                                                   Cursor="Hand"
-                                                   PointerPressed="Url_PointerPressed" />
-                                    </Grid>
+                                    <StackPanel>
+                                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto">
+                                            <TextBlock Grid.Row="0"
+                                                       Grid.Column="0"
+                                                       Text="Title ID:"
+                                                       Foreground="#FF9A9A9A"
+                                                       Margin="0,0,8,4" />
+                                            <TextBlock Grid.Row="0"
+                                                       Grid.Column="1"
+                                                       Text="{Binding SelectedEntitlement?.TitleId}"
+                                                       Cursor="Hand"
+                                                       PointerPressed="CopyToClipboard_PointerPressed" />
+                                            <TextBlock Grid.Row="2"
+                                                       Grid.Column="0"
+                                                       Text="Entitlement ID:"
+                                                       Foreground="#FF9A9A9A"
+                                                       Margin="0,0,8,4" />
+                                            <TextBlock Grid.Row="2"
+                                                       Grid.Column="1"
+                                                       Text="{Binding SelectedEntitlement?.EntitlementId}"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="11"
+                                                       Cursor="Hand"
+                                                       PointerPressed="CopyToClipboard_PointerPressed" />
+                                            <TextBlock Grid.Row="4"
+                                                       Grid.Column="0"
+                                                       Text="Product ID:"
+                                                       Foreground="#FF9A9A9A"
+                                                       Margin="0,0,8,4" />
+                                            <TextBlock Grid.Row="4"
+                                                       Grid.Column="1"
+                                                       Text="{Binding SelectedEntitlement?.ProductId}"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="11"
+                                                       Cursor="Hand"
+                                                       PointerPressed="CopyToClipboard_PointerPressed" />
+                                            <TextBlock Grid.Row="6" Grid.Column="0"
+                                                       Text="URL:"
+                                                       Foreground="#FF9A9A9A"
+                                                       Margin="0,0,8,4"
+                                                       IsVisible="{Binding SelectedEntitlement?.HasReferencePackageUrl}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="1"
+                                                       Text="{Binding SelectedEntitlement?.ReferencePackageUrl, TargetNullValue='Missing'}"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding SelectedEntitlement?.HasReferencePackageUrl}"
+                                                       Cursor="Hand"
+                                                       PointerPressed="Url_PointerPressed" />
+                                        </Grid>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </ScrollViewer>
+                            </ScrollViewer>
+
+                            <Button Grid.Row="1"
+                                    Margin="0,12,0,0"
+                                    HorizontalAlignment="Center"
+                                    IsVisible="{Binding SelectedEntitlement?.HasReferencePackageUrl}"
+                                    IsEnabled="{Binding CanDownload}"
+                                    ToolTip.Tip="{Binding DownloadToolTip}"
+                                    ToolTip.ShowOnDisabled="True"
+                                    Click="Download_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <colek:Codicon Data="{StaticResource Codicon.CloudDownload}"
+                                                   Width="16"
+                                                   Height="16"
+                                                   Stretch="Uniform"
+                                                   VerticalAlignment="Center" />
+                                    <TextBlock Text="Download" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
                     </Border>
                 </Grid>
             </Border>

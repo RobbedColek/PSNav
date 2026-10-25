@@ -1,9 +1,8 @@
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using PSNav.Models.Patches;
+using PSNav.Services.Consoles;
 
 namespace PSNav.Services.Patches;
 
@@ -22,13 +21,7 @@ public sealed class PatchService : IPatchService
         HttpRequestMessage request = new(HttpMethod.Get, patch.ReferencePackageUrl);
         HttpResponseMessage response = await HttpClient.SendAsync(request);
         string responseBody = await response.Content.ReadAsStringAsync();
-        XDocument xmlDocument = XDocument.Parse(responseBody);
-
-        string? jsonUrl = xmlDocument
-            .Descendants("package")
-            .FirstOrDefault()
-            ?.Attribute("manifest_url")
-            ?.Value;
+        string? jsonUrl = ReferencePackage.GetManifestUrl(responseBody);
 
         if (jsonUrl == null)
         {

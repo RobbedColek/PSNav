@@ -10,6 +10,7 @@ public interface IConsolesRepository
 {
     IReadOnlyList<ConsoleModel> GetAllConsoles();
     void UpsertConsole(ConsoleModel console);
+    void SetPlatformIfUnknown(int consoleId, string platform);
     void DeleteConsole(int consoleId);
     Task UpdateEntitlements(int consoleId, string entitlementsFilePath, IProgress<ProgressReport>? progress = null);
     IReadOnlyList<ConsoleProfile> GetProfilesForConsole(int consoleId);

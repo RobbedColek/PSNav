@@ -8,10 +8,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using PSNav.Infrastructure.Export;
+using PSNav.Models.Consoles;
 using PSNav.Models.Entitlements;
 using PSNav.Models.Messages;
+using PSNav.Repositories.Consoles;
 using PSNav.Repositories.Entitlements;
 using PSNav.Repositories.Settings;
+using PSNav.Services.Consoles;
 
 namespace PSNav.ViewModels.Entitlements;
 
@@ -38,14 +41,25 @@ public sealed partial class EntitlementsViewModel : ViewModelBase
 
     private readonly IEntitlementsRepository _entitlementsRepository;
     private readonly ISettingsRepository _settingsRepository;
+    private readonly IConsolesRepository _consolesRepository;
+    private readonly IConsoleInstallService _consoleInstallService;
+    private readonly IPackageManifestService _packageManifestService;
 
     public EntitlementsViewModel(IEntitlementsRepository entitlementsRepository,
-        ISettingsRepository settingsRepository)
+        ISettingsRepository settingsRepository, IConsolesRepository consolesRepository,
+        IConsoleInstallService consoleInstallService, IPackageManifestService packageManifestService)
     {
         _entitlementsRepository = entitlementsRepository;
         _settingsRepository = settingsRepository;
+        _consolesRepository = consolesRepository;
+        _consoleInstallService = consoleInstallService;
+        _packageManifestService = packageManifestService;
         InitializeColumns();
-        WeakReferenceMessenger.Default.Register<ConsolesChangedMessage>(this, (_, _) => RefreshAllEntitlements());
+        WeakReferenceMessenger.Default.Register<ConsolesChangedMessage>(this, (_, _) =>
+        {
+            RefreshAllEntitlements();
+            RefreshDownloadTargets();
+        });
         WeakReferenceMessenger.Default.Register<AccountsSynchronizedMessage>(this, (_, _) => RefreshAllEntitlements());
         WeakReferenceMessenger.Default.Register<AccountDeletedMessage>(this, (_, _) => RefreshAllEntitlements());
         WeakReferenceMessenger.Default.Register<AccountUpdatedMessage>(this, (_, _) => RefreshAllEntitlements());
@@ -145,6 +159,86 @@ public sealed partial class EntitlementsViewModel : ViewModelBase
 
     [ObservableProperty] private Entitlement? _selectedEntitlement;
 
+    partial void OnSelectedEntitlementChanged(Entitlement? value)
+    {
+        RefreshDownloadTargets();
+    }
+
+    public ObservableCollection<ConsoleModel> DownloadTargetConsoles { get; } = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanDownload))]
+    private bool _isDownloadBusy;
+
+    [ObservableProperty] private string? _downloadToolTip;
+
+    [ObservableProperty] private string? _noDownloadTargetsText;
+
+    public bool CanDownload => SelectedEntitlement?.HasReferencePackageUrl == true && !IsDownloadBusy &&
+                               !ReferencePackage.IsLicenseOnly(SelectedEntitlement.Type);
+
+    public void RefreshDownloadTargets()
+    {
+        Entitlement? entitlement = SelectedEntitlement;
+        bool isPs5Entitlement = ConsolePlatform.IsPs5(entitlement?.Platform);
+
+        DownloadTargetConsoles.Clear();
+        if (entitlement?.HasReferencePackageUrl == true)
+        {
+            foreach (ConsoleModel console in _consolesRepository.GetAllConsoles())
+            {
+                if (string.IsNullOrWhiteSpace(console.IpAddress))
+                    continue;
+
+                if (isPs5Entitlement && ConsolePlatform.IsPs4(console.Platform))
+                    continue;
+
+                DownloadTargetConsoles.Add(console);
+            }
+        }
+
+        NoDownloadTargetsText = DownloadTargetConsoles.Count > 0
+            ? null
+            : isPs5Entitlement
+                ? "No PS5 consoles with an IP address"
+                : "No consoles with an IP address";
+        OnPropertyChanged(nameof(CanDownload));
+    }
+
+    public async Task SendToConsoleAsync(ConsoleModel console)
+    {
+        Entitlement? entitlement = SelectedEntitlement;
+        if (IsDownloadBusy || entitlement?.HasReferencePackageUrl != true)
+            return;
+
+        IsDownloadBusy = true;
+        try
+        {
+            await _consoleInstallService.SendToConsoleAsync(entitlement, console);
+        }
+        finally
+        {
+            IsDownloadBusy = false;
+        }
+    }
+
+    public async Task<IReadOnlyList<string>> GetPackageUrlsAsync()
+    {
+        Entitlement? entitlement = SelectedEntitlement;
+        if (IsDownloadBusy || entitlement?.HasReferencePackageUrl != true)
+            return [];
+
+        IsDownloadBusy = true;
+        try
+        {
+            return await _packageManifestService.GetPackageUrlsAsync(entitlement);
+        }
+        finally
+        {
+            IsDownloadBusy = false;
+        }
+    }
+
     [ObservableProperty] private bool _isImageOverlayVisible;
 
     [ObservableProperty] private byte[]? _fullImageBytes;
@@ -153,6 +247,7 @@ public sealed partial class EntitlementsViewModel : ViewModelBase
     private void LoadAllEntitlements()
     {
         InitializeColumns();
+        RefreshDownloadTargets();
         if (FilteredEntitlements.Count > 0) return;
         RefreshAllEntitlements();
     }

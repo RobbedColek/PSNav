@@ -22,7 +22,7 @@ public sealed class ConsolesRepository(
         var consoles = new List<ConsoleModel>();
         SqliteConnection connection = databaseService.GetConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt, IpAddress, FtpPort FROM Consoles ORDER BY Name COLLATE NOCASE";
+        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt, IpAddress, FtpPort, Platform FROM Consoles ORDER BY Name COLLATE NOCASE";
 
         using SqliteDataReader reader = command.ExecuteReader();
         while (reader.Read())
@@ -37,7 +37,7 @@ public sealed class ConsolesRepository(
     {
         SqliteConnection connection = databaseService.GetConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt, IpAddress, FtpPort FROM Consoles WHERE ConsoleID = @id";
+        command.CommandText = "SELECT ConsoleID, Name, CreatedAt, UpdatedAt, IpAddress, FtpPort, Platform FROM Consoles WHERE ConsoleID = @id";
         command.Parameters.AddWithValue("@id", consoleId);
 
         using SqliteDataReader reader = command.ExecuteReader();
@@ -54,7 +54,7 @@ public sealed class ConsolesRepository(
             command.CommandText =
                 """
                 UPDATE Consoles 
-                SET Name = @name, IpAddress = @ipAddress, FtpPort = @ftpPort, UpdatedAt = unixepoch()
+                SET Name = @name, IpAddress = @ipAddress, FtpPort = @ftpPort, Platform = @platform, UpdatedAt = unixepoch()
                 WHERE ConsoleID = @id
                 """;
             command.Parameters.AddWithValue("@id", console.Id.Value);
@@ -63,8 +63,8 @@ public sealed class ConsolesRepository(
         {
             command.CommandText =
                 """
-                INSERT INTO Consoles (Name, IpAddress, FtpPort)
-                VALUES (@name, @ipAddress, @ftpPort)
+                INSERT INTO Consoles (Name, IpAddress, FtpPort, Platform)
+                VALUES (@name, @ipAddress, @ftpPort, @platform)
                 RETURNING ConsoleID;
                 """;
         }
@@ -72,11 +72,22 @@ public sealed class ConsolesRepository(
         command.Parameters.AddWithValue("@name", console.Name);
         command.Parameters.AddWithValue("@ipAddress", ToDbValue(console.IpAddress));
         command.Parameters.AddWithValue("@ftpPort", console.FtpPort);
+        command.Parameters.AddWithValue("@platform", ToDbValue(console.Platform));
 
         if (console.Id.HasValue)
             command.ExecuteNonQuery();
         else
             console.Id = Convert.ToInt32(command.ExecuteScalar());
+    }
+
+    public void SetPlatformIfUnknown(int consoleId, string platform)
+    {
+        SqliteConnection connection = databaseService.GetConnection();
+        using SqliteCommand command = connection.CreateCommand();
+        command.CommandText = "UPDATE Consoles SET Platform = @platform WHERE ConsoleID = @id AND Platform IS NULL";
+        command.Parameters.AddWithValue("@id", consoleId);
+        command.Parameters.AddWithValue("@platform", platform);
+        command.ExecuteNonQuery();
     }
 
     public void DeleteConsole(int consoleId)
@@ -605,7 +616,8 @@ public sealed class ConsolesRepository(
             CreatedAt = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64(2)),
             UpdatedAt = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64(3)),
             IpAddress = reader.IsDBNull(4) ? null : reader.GetString(4),
-            FtpPort = reader.GetInt32(5)
+            FtpPort = reader.GetInt32(5),
+            Platform = reader.IsDBNull(6) ? null : reader.GetString(6)
         };
     }
 

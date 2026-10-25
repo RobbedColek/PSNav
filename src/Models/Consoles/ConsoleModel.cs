@@ -8,6 +8,7 @@ public sealed class ConsoleModel
     public required string Name { get; set; }
     public string? IpAddress { get; set; }
     public int FtpPort { get; set; } = 2121;
+    public string? Platform { get; set; }
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset UpdatedAt { get; init; }
 }

@@ -59,6 +59,8 @@ public class App : Application
         services.AddSingleton<IPatchService, PatchService>();
         services.AddSingleton<IBackloggerySyncService, BackloggerySyncService>();
         services.AddSingleton<IConsoleFtpService, ConsoleFtpService>();
+        services.AddSingleton<IPackageManifestService, PackageManifestService>();
+        services.AddSingleton<IConsoleInstallService, ConsoleInstallService>();
         services.AddSingleton<IDialogService, DialogService>();
 
         // Register ViewModels

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,7 @@ using Avalonia.Platform.Storage;
 using ColekUI.Controls;
 using ColekUI.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
+using PSNav.Models.Consoles;
 using PSNav.Models.Entitlements;
 using PSNav.ViewModels.Entitlements;
 
@@ -182,6 +184,72 @@ public partial class EntitlementsView : UserControl
 
         _viewModel.SearchText = selectedEntitlement.TitleId!;
         _viewModel.SelectedEntitlement = selectedEntitlement;
+    }
+
+    private void Download_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || !_viewModel.CanDownload)
+            return;
+
+        MenuItem copyItem = new() { Header = "Copy PKG URLs" };
+        copyItem.Click += async (_, _) => await CopyPackageUrlsAsync();
+
+        MenuFlyout flyout = new() { Placement = PlacementMode.Top };
+        flyout.Items.Add(copyItem);
+        flyout.Items.Add(new Separator());
+
+        if (_viewModel.NoDownloadTargetsText is { } noTargetsText)
+            flyout.Items.Add(new MenuItem { Header = noTargetsText, IsEnabled = false });
+
+        foreach (ConsoleModel console in _viewModel.DownloadTargetConsoles)
+        {
+            MenuItem item = new()
+            {
+                Header = string.IsNullOrEmpty(console.Platform)
+                    ? $"Install on {console.Name} ({console.IpAddress})"
+                    : $"Install on {console.Name} ({console.Platform}, {console.IpAddress})"
+            };
+            item.Click += async (_, _) => await SendToConsoleAsync(console);
+            flyout.Items.Add(item);
+        }
+
+        flyout.ShowAt(button);
+    }
+
+    private async Task CopyPackageUrlsAsync()
+    {
+        IReadOnlyList<string> urls;
+        try
+        {
+            urls = await _viewModel.GetPackageUrlsAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync("Failed to get PKG URLs", ex);
+            return;
+        }
+
+        IClipboard? clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (urls.Count == 0 || clipboard is null)
+            return;
+
+        await clipboard.SetTextAsync(string.Join(Environment.NewLine, urls));
+        ShowToast(urls.Count == 1 ? "Copied 1 PKG URL" : $"Copied {urls.Count} PKG URLs");
+    }
+
+    private async Task SendToConsoleAsync(ConsoleModel console)
+    {
+        try
+        {
+            await _viewModel.SendToConsoleAsync(console);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync("Failed to download on console", ex);
+            return;
+        }
+
+        ShowToast($"Sent to {console.Name}");
     }
 
     private async void Url_PointerPressed(object? sender, PointerPressedEventArgs e)

@@ -6,6 +6,6 @@ namespace PSNav.Services.Consoles;
 
 public interface IConsoleFtpService
 {
-    Task DownloadDatabaseAsync(string ipAddress, int port, string destinationPath,
+    Task<string> DownloadDatabaseAsync(string ipAddress, int port, string destinationPath,
         IProgress<ProgressReport>? progress = null);
 }

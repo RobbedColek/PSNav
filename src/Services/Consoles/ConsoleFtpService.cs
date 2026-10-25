@@ -15,7 +15,7 @@ public sealed class ConsoleFtpService : IConsoleFtpService
 {
     private const string DatabaseDirectory = "/system_data/priv/license";
 
-    public async Task DownloadDatabaseAsync(string ipAddress, int port, string destinationPath,
+    public async Task<string> DownloadDatabaseAsync(string ipAddress, int port, string destinationPath,
         IProgress<ProgressReport>? progress = null)
     {
         if (!IPAddress.TryParse(ipAddress, out IPAddress? address))
@@ -59,6 +59,8 @@ public sealed class ConsoleFtpService : IConsoleFtpService
 
             if (result != FtpStatus.Success)
                 throw new IOException($"The FTP download returned {result}.");
+
+            return database.Name;
         }
         catch (Exception exception)
         {

@@ -122,7 +122,7 @@ public partial class ConsolesView : UserControl
         {
             ConsoleSettingsWindow dialog = new("Edit console",
                 "Update the console's name and optional FTP connection settings. This does not connect to the console.",
-                "Save", new ConsoleSettings(console.Name, console.IpAddress, console.FtpPort), false);
+                "Save", new ConsoleSettings(console.Name, console.IpAddress, console.FtpPort, console.Platform), false);
             ConsoleSettings? settings = await _dialogs.ShowAsync<ConsoleSettings?>(dialog,
                 TopLevel.GetTopLevel(this) as Window);
 
@@ -146,7 +146,7 @@ public partial class ConsolesView : UserControl
             {
                 ConsoleSettingsWindow dialog = new("Set up console FTP",
                     "Enter the console's IP address and FTP port.",
-                    "Save and synchronize", new ConsoleSettings(console.Name, console.IpAddress, console.FtpPort), true);
+                    "Save and synchronize", new ConsoleSettings(console.Name, console.IpAddress, console.FtpPort, console.Platform), true);
                 ConsoleSettings? settings = await _dialogs.ShowAsync<ConsoleSettings?>(dialog,
                     TopLevel.GetTopLevel(this) as Window);
 

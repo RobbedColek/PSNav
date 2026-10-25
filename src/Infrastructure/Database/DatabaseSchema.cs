@@ -4,7 +4,7 @@ namespace PSNav.Infrastructure.Database;
 
 internal static class DatabaseSchema
 {
-    internal const int CurrentVersion = 2;
+    internal const int CurrentVersion = 3;
 
     internal const string ConsoleProfilesDefinition =
         """
@@ -110,6 +110,7 @@ internal static class DatabaseSchema
                 Name TEXT NOT NULL,
                 IpAddress TEXT NULL,
                 FtpPort INTEGER NOT NULL DEFAULT 2121 CHECK (FtpPort BETWEEN 1 AND 65535),
+                Platform TEXT NULL,
                 CreatedAt INTEGER NOT NULL DEFAULT (unixepoch()),
                 UpdatedAt INTEGER NOT NULL DEFAULT (unixepoch())
             );

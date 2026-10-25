@@ -6,25 +6,25 @@ namespace PSNav.Services.Consoles;
 
 public static class ConsoleSettingsValidator
 {
-    public static bool TryValidate(string? name, string? ipAddress, string? port, bool requireIpAddress,
-        out ConsoleSettings? settings, out string error)
+    public static bool TryValidate(string? name, string? ipAddress, string? port, string? platform,
+        bool requireIpAddress, out ConsoleSettings? settings, out string error)
     {
         int ftpPort = int.TryParse(port, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedPort)
             ? parsedPort
             : 0;
 
-        return TryValidate(name, ipAddress, ftpPort, requireIpAddress, out settings, out error);
+        return TryValidate(name, ipAddress, ftpPort, platform, requireIpAddress, out settings, out error);
     }
 
     public static bool TryValidate(ConsoleSettings settings, bool requireIpAddress, out ConsoleSettings? validated,
         out string error)
     {
-        return TryValidate(settings.Name, settings.IpAddress, settings.FtpPort, requireIpAddress, out validated,
-            out error);
+        return TryValidate(settings.Name, settings.IpAddress, settings.FtpPort, settings.Platform, requireIpAddress,
+            out validated, out error);
     }
 
-    private static bool TryValidate(string? name, string? ipAddress, int ftpPort, bool requireIpAddress,
-        out ConsoleSettings? settings, out string error)
+    private static bool TryValidate(string? name, string? ipAddress, int ftpPort, string? platform,
+        bool requireIpAddress, out ConsoleSettings? settings, out string error)
     {
         settings = null;
         error = string.Empty;
@@ -59,7 +59,13 @@ public static class ConsoleSettingsValidator
             return false;
         }
 
-        settings = new ConsoleSettings(trimmedName, trimmedIpAddress, ftpPort);
+        if (platform is not (null or ConsolePlatform.Ps4 or ConsolePlatform.Ps5))
+        {
+            error = "Please select a valid console platform.";
+            return false;
+        }
+
+        settings = new ConsoleSettings(trimmedName, trimmedIpAddress, ftpPort, platform);
         return true;
     }
 }
