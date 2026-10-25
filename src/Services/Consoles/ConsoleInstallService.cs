@@ -45,7 +45,7 @@ public sealed class ConsoleInstallService(IPackageManifestService packageManifes
         }
         catch (HttpRequestException exception)
         {
-            throw new InvalidOperationException($"{DpiRequirement(console)}" + System.Environment.NewLine + "{exception.Message}", exception);
+            throw new InvalidOperationException($"{DpiRequirement(console)}{Environment.NewLine}{exception.Message}", exception);
         }
 
         if (!response.Contains("SUCCESS:", StringComparison.Ordinal))
