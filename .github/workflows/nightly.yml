@@ -21,7 +21,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           last=$(gh api "repos/${{ github.repository }}/commits/nightly" --jq .sha 2>/dev/null) || last=none
-          if [ "$last" = "${{ github.sha }}" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+          released=$(gh api --paginate "repos/${{ github.repository }}/git/matching-refs/tags/v" --jq '.[].object.sha' | grep -cx "${{ github.sha }}" || true)
+          if [ "${{ github.event_name }}" = "schedule" ] && { [ "$last" = "${{ github.sha }}" ] || [ "$released" != "0" ]; }; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
